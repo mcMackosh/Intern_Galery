@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  db:
+    container_name: postgres_db
+    image: postgres:15.2
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - 5433:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  # api:
+  #   container_name: nest-app
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 4000:4000
+  #   restart: always
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #     - DATABASE_HOST=${POSTGRES_HOST}
+  #     - DATABASE_PORT=${POSTGRES_PORT}
+  #   networks:
+  #     - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
