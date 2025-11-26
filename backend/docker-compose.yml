@@ -16,6 +16,18 @@ services:
     networks:
       - backend
 
+  redis:
+    container_name: redis_cash
+    image: redis:6.0
+    restart: always
+    ports:
+      - 6379:6379
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend  
+
   # api:
   #   container_name: nest-app
   #   build:
@@ -37,6 +49,7 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   backend:

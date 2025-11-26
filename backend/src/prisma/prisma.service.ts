@@ -1,6 +1,5 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-
+import { PrismaClient } from '../../prisma/__generated__';
 //docker compose up -d   prisma db push
 
 @Injectable()
@@ -13,6 +12,6 @@ export class PrismaService
 	}
 
 	public async onModuleDestroy(): Promise<void> {
-		await this.$disconnect
+		await this.$disconnect()
 	}
 }

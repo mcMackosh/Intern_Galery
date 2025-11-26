@@ -9,6 +9,7 @@ const core_1 = require("@nestjs/core");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const express_1 = require("express");
 const app_module_1 = require("./app.module");
+const swagger_1 = require("@nestjs/swagger");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const config = app.get(config_1.ConfigService);
@@ -22,6 +23,14 @@ async function bootstrap() {
         credentials: true,
         exposedHeaders: ['set-cookie']
     });
+    const swaggerConfig = new swagger_1.DocumentBuilder()
+        .setTitle('Auth API')
+        .setDescription('Authentication endpoints')
+        .setVersion('1.0')
+        .addBearerAuth()
+        .build();
+    const document = swagger_1.SwaggerModule.createDocument(app, swaggerConfig);
+    swagger_1.SwaggerModule.setup('api', app, document);
     await app.listen(config.getOrThrow('APPLICATION_PORT'));
 }
 bootstrap().catch(err => {
