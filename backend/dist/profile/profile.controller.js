@@ -28,6 +28,7 @@ let ProfileController = class ProfileController {
         return this.userService.findById(userId);
     }
     async updateProfile(userId, dto) {
+        console.log(dto);
         return this.userService.update(userId, dto);
     }
 };

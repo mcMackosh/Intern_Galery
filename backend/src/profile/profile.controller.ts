@@ -33,7 +33,7 @@ export class ProfileController {
 		@Authorized('userId') userId: string,
 		@Body() dto: UpdateProfileDto
 	) {
-
+		console.log(dto)
 		return this.userService.update(userId, dto)
 	}
 }

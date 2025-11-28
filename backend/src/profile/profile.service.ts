@@ -54,7 +54,6 @@ export class ProfileService {
 			const existing = await this.findByEmail(dto.email);
 			if (existing) throw new ConflictException('Email already in use');
 		}
-
 		const updateData: any = {};
 		if (dto.firstName !== undefined) updateData.firstname = dto.firstName;
 		if (dto.lastName !== undefined) updateData.lastname = dto.lastName;
