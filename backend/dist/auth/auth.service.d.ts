@@ -14,9 +14,9 @@ export declare class AuthService {
         user: {
             email: string;
             password: string;
+            firstName: string;
+            lastName: string;
             id: string;
-            firstname: string;
-            lastname: string;
             createdAt: Date;
             updatedAt: Date;
         };
@@ -26,9 +26,9 @@ export declare class AuthService {
     register(dto: RegisterDto): Promise<{
         user: {
             email: string;
+            firstName: string;
+            lastName: string;
             id: string;
-            firstname: string;
-            lastname: string;
             createdAt: Date;
             updatedAt: Date;
         };
@@ -39,9 +39,9 @@ export declare class AuthService {
     refreshTokens(token: string): Promise<{
         user: {
             email: string;
+            firstName: string;
+            lastName: string;
             id: string;
-            firstname: string;
-            lastname: string;
             createdAt: Date;
             updatedAt: Date;
         };

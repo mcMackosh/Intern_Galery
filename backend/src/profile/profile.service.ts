@@ -1,18 +1,27 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { userSafeSelect } from './profile.select';
-import { UpdateProfileDto } from './dto/profile.dto';
+import { UserSafeSelectType, userSafeSelect } from './profile.select';
+import { ProfileDto } from './dto/profile.dto';
+import { RegisterDto } from 'src/auth/dto/register.dto';
+import { User } from '../../prisma/__generated__/client';
 
 @Injectable()
 export class ProfileService {
 	public constructor(private readonly prismaService: PrismaService) { }
 
 	public async findById(id: string) {
-		const user = await this.prismaService.user.findUnique({
-			where: { id },
-			select: userSafeSelect
-		})
+		let user: UserSafeSelectType | null;
+		try {
+			user = await this.prismaService.user.findUnique({
+				where: { id },
+				select: userSafeSelect,
+			});
+		} catch {
+			throw new InternalServerErrorException(
+				'Error while finding user by ID',
+			);
+		}
 
 		if (!user) {
 			throw new NotFoundException('User not found. Please, check entered data.')
@@ -22,51 +31,69 @@ export class ProfileService {
 	}
 
 	public async findByEmail(email: string) {
-		const user = await this.prismaService.user.findUnique({
-			where: { email }
-		})
-		return user
+		try {
+			return await this.prismaService.user.findUnique({
+				where: { email },
+			});
+		} catch {
+			throw new InternalServerErrorException(
+				'Error while finding user by email',
+			);
+		}
 	}
 
-	public async create(
-		firstname: string,
-		lastname: string,
-		email: string,
-		password: string
-	) {
-		const user = await this.prismaService.user.create({
-			data: {
-				firstname,
-				lastname,
-				password: password ? await bcrypt.hash(password, 10) : '',
-				email,
-			},
-			select: userSafeSelect
-		})
+	public async create(dto: RegisterDto) {
+		try {
+			return await this.prismaService.user.create({
+				data: {
+					...dto,
+					password: await bcrypt.hash(dto.password, 10)
+				} as User,
+				select: userSafeSelect,
+			});
+		} catch(err) {
 
-		return user
+			if(err.code === 'P2002' && err.meta?.target?.includes('email'))
+			{
+				throw new ConflictException(
+				'User with wthis email already exists. Please, try to login or use another email.')
+			}
+
+			throw new InternalServerErrorException(
+				'Error while creating user',
+			);
+		}
 	}
 
-	public async update(id: string, dto: UpdateProfileDto) {
+	public async update(id: string, dto: ProfileDto) {
 		const user = await this.findById(id);
 
 		if (dto.email && dto.email !== user.email) {
-			const existing = await this.findByEmail(dto.email);
+			let existing;
+			try {
+				existing = await this.findByEmail(dto.email);
+			} catch {
+				throw new InternalServerErrorException(
+					'Error while validating email',
+				);
+			}
+
 			if (existing) throw new ConflictException('Email already in use');
 		}
-		const updateData: any = {};
-		if (dto.firstName !== undefined) updateData.firstname = dto.firstName;
-		if (dto.lastName !== undefined) updateData.lastname = dto.lastName;
-		if (dto.email !== undefined) updateData.email = dto.email;
-		if (dto.password !== undefined) {
-			updateData.password = await bcrypt.hash(dto.password, 10);
-		}
 
-		const updatedUser = await this.prismaService.user.update({
-			where: { id },
-			data: updateData,
-			select: userSafeSelect,
-		});
+		let updatedUser: UserSafeSelectType | null;
+
+		try {
+			updatedUser = await this.prismaService.user.update({
+				where: { id },
+				data: dto,
+				select: userSafeSelect,
+			});
+		} catch {
+			throw new InternalServerErrorException(
+				'Error while updating user',
+			);
+		}
 
 		return updatedUser;
 	}

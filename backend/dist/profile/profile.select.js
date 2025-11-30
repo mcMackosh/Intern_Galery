@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userSafeSelect = void 0;
 exports.userSafeSelect = {
     id: true,
-    firstname: true,
-    lastname: true,
+    firstName: true,
+    lastName: true,
     email: true,
     createdAt: true,
     updatedAt: true,

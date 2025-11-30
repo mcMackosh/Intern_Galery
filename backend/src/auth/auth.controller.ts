@@ -21,7 +21,7 @@ export class AuthController {
 	@ApiResponse({ status: 400, description: 'Bad request' })
 	public async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
 		const { accessToken, refreshToken } = await this.authService.register(dto);
-		setRefreshTokenCookie(res, refreshToken, 10 * 60 * 1000); // можна передати індивідуальний maxAge
+		setRefreshTokenCookie(res, refreshToken, 10 * 60 * 1000);
 		return { accessToken };
 	}
 
@@ -64,7 +64,7 @@ export class AuthController {
 		} catch (err) {
 			await this.authService.logoutByToken(refreshToken);
 			clearRefreshTokenCookie(res);
-			throw new UnauthorizedException('Refresh token expired or invalid');
+			throw new UnauthorizedException(err.message);
 		}
 	}
 }

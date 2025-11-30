@@ -1,21 +1,21 @@
 import { ProfileService } from './profile.service';
-import { UpdateProfileDto } from './dto/profile.dto';
+import { ProfileDto } from './dto/profile.dto';
 export declare class ProfileController {
     private readonly userService;
     constructor(userService: ProfileService);
     findProfile(userId: string): Promise<{
         email: string;
+        firstName: string;
+        lastName: string;
         id: string;
-        firstname: string;
-        lastname: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
-    updateProfile(userId: string, dto: UpdateProfileDto): Promise<{
+    updateProfile(userId: string, dto: ProfileDto): Promise<{
         email: string;
+        firstName: string;
+        lastName: string;
         id: string;
-        firstname: string;
-        lastname: string;
         createdAt: Date;
         updatedAt: Date;
     }>;

@@ -39,9 +39,5 @@ export function useUpdateProfile() {
     onSuccess: () => {
       toast.success('Profile updated successfully!');
     },
-
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['myProfile'] });
-    },
   });
 }

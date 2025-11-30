@@ -14,10 +14,7 @@ export const RegisterSchema = z
       .max(50, "Lastname must be no more than 50 characters")
       .regex(/^[A-Za-zА-Яа-яЇїІіЄєҐґ]+$/, "Lastname cannot contain numbers"),
 
-    email: z.string()
-      .refine(val => val === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
-        message: "Invalid email address",
-    }),
+    email: z.email(),
 
     password: z
       .string()

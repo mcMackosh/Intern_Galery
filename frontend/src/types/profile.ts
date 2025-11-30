@@ -1,15 +1,10 @@
 export interface IProfile {
     id: string;
-    firstname: string;
-    lastname: string;
+    firstName: string;
+    lastName: string;
     email: string ;
     updatedAt: Date;
     createdAt: Date;
 }
 
-export interface UpdateProfile {
-    firstName: string | undefined;
-    lastName: string | undefined;
-    email: string | undefined;
-    password: string | undefined
-}
+export type UpdateProfile = Partial<Omit<IProfile, "id" | "createdAt" | "updatedAt"> & {password: string}>;

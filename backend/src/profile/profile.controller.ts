@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Put, UseGuards } from '@ne
 import { ProfileService } from './profile.service';
 import { Authorized } from 'src/auth/decorators/authorized.decorator';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
-import { UpdateProfileDto } from './dto/profile.dto';
+import { ProfileDto } from './dto/profile.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('profile')
@@ -31,9 +31,8 @@ export class ProfileController {
   	@ApiBearerAuth()
 	public async updateProfile(
 		@Authorized('userId') userId: string,
-		@Body() dto: UpdateProfileDto
+		@Body() dto: ProfileDto
 	) {
-		console.log(dto)
 		return this.userService.update(userId, dto)
 	}
 }

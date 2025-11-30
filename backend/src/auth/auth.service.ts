@@ -7,6 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { RedisService } from 'src/redis/redis.service';
+import { User } from 'prisma/__generated__';
+import { UserSafeSelectType } from 'src/profile/profile.select';
 
 @Injectable()
 export class AuthService {
@@ -39,30 +41,26 @@ export class AuthService {
 		const accessToken = await this.generateToken('ACCESS', existingUser.id);
 		const refreshToken = await this.generateToken('REFRESH', existingUser.id);
 
-		await this.redisService.setRefreshToken(existingUser.id, refreshToken);
+		try {
+			await this.redisService.setRefreshToken(existingUser.id, refreshToken);
+		} catch {
+			throw new InternalServerErrorException('Error while saving refresh token');
+		}
 
 		return { user: existingUser, accessToken, refreshToken }
 	}
+
 	public async register(dto: RegisterDto) {
-		const user = await this.profileService.findByEmail(dto.email)
-
-		if (user) {
-			throw new ConflictException(
-				'User with wthis email already exists. Please, try to login or use another email.'
-			)
-		}
-
-		const newUser = await this.profileService.create(
-			dto.firstName,
-			dto.lastName,
-			dto.email,
-			dto.password
-		)
+		let newUser = await this.profileService.create(dto)
 
 		const accessToken = await this.generateToken('ACCESS', newUser.id)
 		const refreshToken = await this.generateToken('REFRESH', newUser.id);
 
-		await this.redisService.setRefreshToken(newUser.id, refreshToken);
+		try {
+			await this.redisService.setRefreshToken(newUser.id, refreshToken);
+		} catch {
+			throw new InternalServerErrorException('Error while saving token');
+		}
 
 		return { user: newUser, accessToken, refreshToken }
 	}
@@ -71,7 +69,7 @@ export class AuthService {
 		const payload = { userId }
 		return this.jwtService.signAsync(payload, {
 			secret: this.configService.get('JWT_SECRET'),
-			expiresIn: type === 'ACCESS' ? '15m' : '2d',
+			expiresIn: type === 'ACCESS' ? '10m' : '2d',
 		});
 	}
 
@@ -87,14 +85,20 @@ export class AuthService {
 		}
 
 		const saved = await this.redisService.getRefreshToken(payload.userId);
+
 		if (!saved || saved !== token) {
-			throw new UnauthorizedException('Token mismatch');
+			throw new InternalServerErrorException('Token mismatch');
 		}
 
 		const accessToken = await this.generateToken('ACCESS', payload.userId)
 		const refreshToken = await this.generateToken('REFRESH', payload.userId);
 
-		await this.redisService.setRefreshToken(payload.userId, refreshToken);
+		try {
+			await this.redisService.setRefreshToken(payload.userId, refreshToken);
+		} catch {
+			throw new UnauthorizedException('Error while saving refresh token');
+		}
+
 		const newUser = await this.profileService.findById(payload.userId);
 
 		return { user: newUser, accessToken, refreshToken }
@@ -109,7 +113,11 @@ export class AuthService {
 	}
 
 	async logoutByToken(token: string) {
-		this.redisService.logoutByToken(token)
+		try {
+			await this.redisService.logoutByToken(token);
+		} catch {
+			throw new InternalServerErrorException('Error while logout');
+		}
 	}
 
 }

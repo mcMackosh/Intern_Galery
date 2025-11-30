@@ -1,105 +1,79 @@
 'use client';
 
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthWrapper } from "../AuthWraprer";
 import { RegisterSchema, TypeRegisterSchema } from "@/feature/auth/schemes";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useRegisterMutation } from "../../hooks/useRegisterMutation";
+import Input from "@/shared/ui/Input";
+import Button from "@/shared/ui/Buton";
 
 export const RegisterForm = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm<TypeRegisterSchema>({
-        resolver: zodResolver(RegisterSchema),
-        defaultValues: {
-            firstName: '',
-            lastName: '',
-            email: '',
-            password: '',
-            confirmPassword: ''
-        },
-    });
+  const { register, handleSubmit, formState: { errors } } = useForm<TypeRegisterSchema>({
+    resolver: zodResolver(RegisterSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    },
+  });
 
-    const { registration, isLoading } = useRegisterMutation();
+  const { registration, isLoading } = useRegisterMutation();
 
-    const onSubmit = (data: TypeRegisterSchema) => {
-        const { confirmPassword, ...payload } = data;
-        registration(data)
-    };
+  const onSubmit: SubmitHandler<TypeRegisterSchema> = (data) => {
+    const { confirmPassword, ...payload } = data;
+    registration(payload as TypeRegisterSchema);
+  };
 
-    return (
-        <AuthWrapper 
-            heading="Create an Account" 
-            description="Join us today!" 
-            backButtonLabel="You already have an account. Log in" 
-            backButtonRef="/login"
-        >
-            <form className="w-full space-y-5" onSubmit={handleSubmit(onSubmit)}>
-                
-                <div className="flex flex-col">
-                    <label className="mb-2 text-sm font-medium text-gray-700">First Name</label>
-                    <input
-                        disabled={isLoading}
-                        type="text"
-                        {...register("firstName")}
-                        placeholder="Your Name"
-                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {errors.firstName && <p className="mt-1 text-sm text-red-500">{errors.firstName.message}</p>}
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="mb-2 text-sm font-medium text-gray-700">Last Name</label>
-                    <input
-                        disabled={isLoading}
-                        type="text"
-                        {...register("lastName")}
-                        placeholder="Your Last Name"
-                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {errors.lastName && <p className="mt-1 text-sm text-red-500">{errors.lastName.message}</p>}
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="mb-2 text-sm font-medium text-gray-700">Email</label>
-                    <input
-                        disabled={isLoading}
-                        type="email"
-                        {...register("email")}
-                        placeholder="you@example.com"
-                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="mb-2 text-sm font-medium text-gray-700">Password</label>
-                    <input
-                        disabled={isLoading}
-                        type="password"
-                        {...register("password")}
-                        placeholder="opwefD@1234"
-                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>}
-                </div>
-
-                <div>
-        <label className="text-gray-700 font-medium">Confirm Password</label>
-        <input
-          type="password"
-          {...register("confirmPassword")}
-          className="w-full p-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500"
+  return (
+    <AuthWrapper
+      heading="Create an Account"
+      description="Join us today!"
+      backButtonLabel="You already have an account. Log in"
+      backButtonRef="/login"
+    >
+      <form className="w-full space-y-5" onSubmit={handleSubmit(onSubmit)}>
+        <Input
+          label="First Name"
+          placeholder="Your Name"
+          disabled={isLoading}
+          {...register("firstName")}
+          error={errors.firstName?.message}
         />
-        {errors.confirmPassword && <p className="text-red-500 mt-1">{errors.confirmPassword.message}</p>}
-      </div>
-
-                <button
-                    disabled={isLoading}
-                    type="submit"
-                    className="w-full py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    {isLoading ? 'Registering...' : 'Register'}
-                </button>
-            </form>
-        </AuthWrapper>
-    );
+        <Input
+          label="Last Name"
+          placeholder="Your Last Name"
+          disabled={isLoading}
+          {...register("lastName")}
+          error={errors.lastName?.message}
+        />
+        <Input
+          label="Email"
+          type="text"
+          placeholder="you@example.com"
+          disabled={isLoading}
+          {...register("email")}
+          error={errors.email?.message}
+        />
+        <Input
+          label="Password"
+          type="password"
+          placeholder="opwefD@1234"
+          disabled={isLoading}
+          {...register("password")}
+          error={errors.password?.message}
+        />
+        <Input
+          label="Confirm Password"
+          type="password"
+          disabled={isLoading}
+          {...register("confirmPassword")}
+          error={errors.confirmPassword?.message}
+        />
+        <Button disabled={isLoading}>{isLoading ? 'Registering...' : 'Register'}</Button>
+      </form>
+    </AuthWrapper>
+  );
 };

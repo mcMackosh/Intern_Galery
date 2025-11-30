@@ -1,6 +1,6 @@
 import { IsString, IsEmail, IsOptional, MinLength, MaxLength, Matches } from 'class-validator';
 
-export class UpdateProfileDto {
+export class ProfileDto {
   @IsOptional()
   @IsString({ message: 'First name must be a string' })
   @MinLength(2, { message: 'First name must be at least 2 characters long' })

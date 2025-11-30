@@ -9,15 +9,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateProfileDto = void 0;
+exports.ProfileDto = void 0;
 const class_validator_1 = require("class-validator");
-class UpdateProfileDto {
+class ProfileDto {
     firstName;
     lastName;
     email;
     password;
 }
-exports.UpdateProfileDto = UpdateProfileDto;
+exports.ProfileDto = ProfileDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)({ message: 'First name must be a string' }),
@@ -25,7 +25,7 @@ __decorate([
     (0, class_validator_1.MaxLength)(50, { message: 'First name cannot be longer than 50 characters' }),
     (0, class_validator_1.Matches)(/^[A-Za-z]+$/, { message: 'First name cannot contain numbers or special characters' }),
     __metadata("design:type", String)
-], UpdateProfileDto.prototype, "firstName", void 0);
+], ProfileDto.prototype, "firstName", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)({ message: 'Last name must be a string' }),
@@ -33,12 +33,12 @@ __decorate([
     (0, class_validator_1.MaxLength)(50, { message: 'Last name cannot be longer than 50 characters' }),
     (0, class_validator_1.Matches)(/^[A-Za-z]+$/, { message: 'Last name cannot contain numbers or special characters' }),
     __metadata("design:type", String)
-], UpdateProfileDto.prototype, "lastName", void 0);
+], ProfileDto.prototype, "lastName", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEmail)({}, { message: 'Invalid email format' }),
     __metadata("design:type", String)
-], UpdateProfileDto.prototype, "email", void 0);
+], ProfileDto.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.MinLength)(8, { message: 'Password must be at least 8 characters long' }),
@@ -46,5 +46,5 @@ __decorate([
         message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
     }),
     __metadata("design:type", String)
-], UpdateProfileDto.prototype, "password", void 0);
+], ProfileDto.prototype, "password", void 0);
 //# sourceMappingURL=profile.dto.js.map

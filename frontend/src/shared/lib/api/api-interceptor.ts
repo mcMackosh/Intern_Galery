@@ -1,17 +1,14 @@
 import { api } from "./axios";
-
 import { errorCatch } from "./api.helper";
 import authServise from "@/servises/auth.servise";
 import { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getAccessToken, saveAccessToken, removeAccessToken } from "../token/token-helper";
 
-
-
 api.interceptors.request.use(config => {
   const accessToken = getAccessToken();
 
   if (config?.headers && accessToken) {
-    config.headers!.Authorization = `Bearer ${accessToken}`;
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
 
   return config;
@@ -25,7 +22,10 @@ api.interceptors.response.use(
 
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-    if (!originalRequest) throw error;
+    
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
 
     const message = errorCatch(error);
 
@@ -33,48 +33,51 @@ api.interceptors.response.use(
       error.response?.status === 401 &&
       (message === "Verification token failed" || message === "No token provided");
 
-    if (!isAuthError) {
-      throw error;
+    if (!isAuthError || originalRequest._retry) {
+      return Promise.reject(error);
     }
-    if (originalRequest._retry) {
-      throw error;
-    }
+
     originalRequest._retry = true;
 
     if (isRefreshing) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         refreshQueue.push((newToken) => {
           if (newToken) {
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            resolve(api(originalRequest));
+          } else {
+            reject(new Error("Token refresh failed"));
           }
-          resolve(api(originalRequest));
         });
       });
     }
 
     isRefreshing = true;
-    
+
     try {
-      const {accessToken}  = await authServise.refreshTokens();
-
-      saveAccessToken(accessToken)
-
-      refreshQueue.forEach((cb) => cb(accessToken));
-      refreshQueue = [];
-
-      isRefreshing = false;
+      const { accessToken } = await authServise.refreshTokens();
+      saveAccessToken(accessToken);
 
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-      return api(originalRequest);
-    } catch (err) {
 
-      refreshQueue.forEach((cb) => cb(null));
+      refreshQueue.forEach((callback) => callback(accessToken));
       refreshQueue = [];
       isRefreshing = false;
-      window.location.replace('/login')
+
+      return api(originalRequest);
+    } catch (refreshError) {
+
+      refreshQueue.forEach((callback) => callback(null));
+      refreshQueue = [];
+      isRefreshing = false;
+
       removeAccessToken();
-      throw err;
       
+      if (typeof window !== "undefined") {
+        window.location.replace('/login');
+      }
+      
+      return Promise.reject(refreshError);
     }
   }
 );

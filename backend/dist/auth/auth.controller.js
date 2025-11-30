@@ -52,7 +52,7 @@ let AuthController = class AuthController {
         catch (err) {
             await this.authService.logoutByToken(refreshToken);
             (0, cookie_helper_1.clearRefreshTokenCookie)(res);
-            throw new common_1.UnauthorizedException('Refresh token expired or invalid');
+            throw new common_1.UnauthorizedException(err.message);
         }
     }
 };

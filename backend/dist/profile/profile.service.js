@@ -53,55 +53,72 @@ let ProfileService = class ProfileService {
         this.prismaService = prismaService;
     }
     async findById(id) {
-        const user = await this.prismaService.user.findUnique({
-            where: { id },
-            select: profile_select_1.userSafeSelect
-        });
+        let user;
+        try {
+            user = await this.prismaService.user.findUnique({
+                where: { id },
+                select: profile_select_1.userSafeSelect,
+            });
+        }
+        catch {
+            throw new common_1.InternalServerErrorException('Error while finding user by ID');
+        }
         if (!user) {
             throw new common_1.NotFoundException('User not found. Please, check entered data.');
         }
         return user;
     }
     async findByEmail(email) {
-        const user = await this.prismaService.user.findUnique({
-            where: { email }
-        });
-        return user;
+        try {
+            return await this.prismaService.user.findUnique({
+                where: { email },
+            });
+        }
+        catch {
+            throw new common_1.InternalServerErrorException('Error while finding user by email');
+        }
     }
-    async create(firstname, lastname, email, password) {
-        const user = await this.prismaService.user.create({
-            data: {
-                firstname,
-                lastname,
-                password: password ? await bcrypt.hash(password, 10) : '',
-                email,
-            },
-            select: profile_select_1.userSafeSelect
-        });
-        return user;
+    async create(dto) {
+        try {
+            return await this.prismaService.user.create({
+                data: {
+                    ...dto,
+                    password: await bcrypt.hash(dto.password, 10)
+                },
+                select: profile_select_1.userSafeSelect,
+            });
+        }
+        catch (err) {
+            if (err.code === 'P2002' && err.meta?.target?.includes('email')) {
+                throw new common_1.ConflictException('User with wthis email already exists. Please, try to login or use another email.');
+            }
+            throw new common_1.InternalServerErrorException('Error while creating user');
+        }
     }
     async update(id, dto) {
         const user = await this.findById(id);
         if (dto.email && dto.email !== user.email) {
-            const existing = await this.findByEmail(dto.email);
+            let existing;
+            try {
+                existing = await this.findByEmail(dto.email);
+            }
+            catch {
+                throw new common_1.InternalServerErrorException('Error while validating email');
+            }
             if (existing)
                 throw new common_1.ConflictException('Email already in use');
         }
-        const updateData = {};
-        if (dto.firstName !== undefined)
-            updateData.firstname = dto.firstName;
-        if (dto.lastName !== undefined)
-            updateData.lastname = dto.lastName;
-        if (dto.email !== undefined)
-            updateData.email = dto.email;
-        if (dto.password !== undefined) {
-            updateData.password = await bcrypt.hash(dto.password, 10);
+        let updatedUser;
+        try {
+            updatedUser = await this.prismaService.user.update({
+                where: { id },
+                data: dto,
+                select: profile_select_1.userSafeSelect,
+            });
         }
-        const updatedUser = await this.prismaService.user.update({
-            where: { id },
-            data: updateData,
-            select: profile_select_1.userSafeSelect,
-        });
+        catch {
+            throw new common_1.InternalServerErrorException('Error while updating user');
+        }
         return updatedUser;
     }
 };

@@ -28,7 +28,6 @@ let ProfileController = class ProfileController {
         return this.userService.findById(userId);
     }
     async updateProfile(userId, dto) {
-        console.log(dto);
         return this.userService.update(userId, dto);
     }
 };
@@ -58,7 +57,7 @@ __decorate([
     __param(0, (0, authorized_decorator_1.Authorized)('userId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, profile_dto_1.UpdateProfileDto]),
+    __metadata("design:paramtypes", [String, profile_dto_1.ProfileDto]),
     __metadata("design:returntype", Promise)
 ], ProfileController.prototype, "updateProfile", null);
 exports.ProfileController = ProfileController = __decorate([
