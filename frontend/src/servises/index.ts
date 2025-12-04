@@ -1,2 +1,4 @@
 export * from './auth.servise'
 export * from './profile.service'
+export * from './gallery.service'
+export * from './membership.service'

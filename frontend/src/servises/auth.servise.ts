@@ -1,6 +1,5 @@
-
 import { AuthResponse } from "../types/auth";
-import { api } from "../shared/lib/api/axios";
+import api from "../shared/lib/api/api-interceptor";
 import { TypeLoginScheme, TypeRegisterSchema } from "@/feature/auth/schemes";
 import { removeAccessToken, saveAccessToken } from "@/shared/lib/token/token-helper";
 
@@ -23,8 +22,8 @@ class AuthServices {
         return res.data;
     };
 
-    public async refreshTokens(): Promise<{accessToken: string}> {
-        const res = await api.post<{accessToken: string}>("/auth/refresh")
+    public async refreshTokens(): Promise<{ accessToken: string }> {
+        const res = await api.post<{ accessToken: string }>("/auth/refresh")
         return res.data;
     }
 }

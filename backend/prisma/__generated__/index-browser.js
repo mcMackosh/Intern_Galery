@@ -135,8 +135,13 @@ exports.Prisma.GalleryScalarFieldEnum = {
   title: 'title',
   description: 'description',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  userId: 'userId'
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MembershipScalarFieldEnum = {
+  userId: 'userId',
+  galleryId: 'galleryId',
+  role: 'role'
 };
 
 exports.Prisma.SortOrder = {
@@ -153,11 +158,16 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-
+exports.UserRole = exports.$Enums.UserRole = {
+  REGULAR: 'REGULAR',
+  ADMIN: 'ADMIN',
+  OWNER: 'OWNER'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',
-  Gallery: 'Gallery'
+  Gallery: 'Gallery',
+  Membership: 'Membership'
 };
 
 /**

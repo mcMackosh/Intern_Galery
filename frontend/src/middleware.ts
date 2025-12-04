@@ -4,13 +4,30 @@ export default function middleware(request: NextRequest) {
   const refreshToken = request.cookies.get("refresh_token")?.value;
   const { pathname } = request.nextUrl;
 
+  // Захист кореневого маршруту
   if (pathname === "/") {
     if (!refreshToken) {
       return NextResponse.redirect(new URL("/login", request.url), { status: 307 });
     }
-  } else if (pathname === "/login" || pathname === "/register") {
+  }
+
+  // Якщо користувач намагається зайти на login/register і вже залогінений
+  if (pathname === "/login" || pathname === "/register") {
     if (refreshToken) {
       return NextResponse.redirect(new URL("/", request.url), { status: 307 });
+    }
+  }
+
+  // Middleware для всіх /gallery/* маршрутів
+  if (pathname.startsWith("/gallery")) {
+    if (!refreshToken) {
+      return NextResponse.redirect(new URL("/login", request.url), { status: 307 });
+    }
+  }
+
+  if (pathname.startsWith("/profile")) {
+    if (!refreshToken) {
+      return NextResponse.redirect(new URL("/login", request.url), { status: 307 });
     }
   }
 
@@ -18,5 +35,5 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/register"],
+  matcher: ["/", "/gallery/:path*", "/profile", "/login", "/register", ],
 };

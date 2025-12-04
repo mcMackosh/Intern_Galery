@@ -10,9 +10,8 @@ export function QueryProvider({ children }: PropsWithChildren) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000 // кеш 5 хвилин
+            refetchOnWindowFocus: false,
+            retry: 1,
           },
         },
       })

@@ -5,7 +5,7 @@ import Redis from 'ioredis';
 export class RedisService {
   constructor(@Inject('REDIS_CLIENT') private readonly redis: Redis) { }
 
-  async setRefreshToken(userId: string, token: string, ttl = 7 * 24 * 3600) {
+  async setRefreshToken(userId: string, token: string, ttl = 2 * 24 * 3600) {
     return await this.redis.set(`refresh:${userId}`, token, 'EX', ttl);
   }
 

@@ -68,6 +68,7 @@ export const RegisterForm = () => {
         <Input
           label="Confirm Password"
           type="password"
+          placeholder="opwefD@1234"
           disabled={isLoading}
           {...register("confirmPassword")}
           error={errors.confirmPassword?.message}

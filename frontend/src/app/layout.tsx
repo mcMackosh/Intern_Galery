@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import '../shared/style/globals.css'
 import { MainProvider } from "../providers/mainProvider";
 import { Toaster } from "sonner";
-
+import { Header } from "@/feature/layouts/Header/Header";
 
 export const metadata: Metadata = {
-  title: 'Custom disk'
+  title: 'Galery'
 }
 
 export default function RootLayout({
@@ -15,10 +15,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className="min-h-screen">
         <MainProvider>
-          {children}
-           <Toaster position="top-right" richColors /> 
+          <Header />
+
+          <div className="pt-16 min-h-screen">
+            {children}
+          </div>
+
+          <Toaster position="top-right" richColors />
         </MainProvider>
       </body>
     </html>

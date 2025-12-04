@@ -17,7 +17,7 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  galleries Gallery[]
+  memberships Membership[]
 
   @@map("users")
 }
@@ -29,8 +29,25 @@ model Gallery {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  memberships Membership[]
 
-  @@map("gallery")
+  @@map("galleries")
+}
+
+model Membership {
+  userId    String   @map("user_id")
+  galleryId String   @map("gallery_id")
+  role      UserRole @default(REGULAR)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gallery Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
+  @@id([galleryId, userId])
+  @@map("gallery_members")
+}
+
+enum UserRole {
+  REGULAR
+  ADMIN
+  OWNER
 }

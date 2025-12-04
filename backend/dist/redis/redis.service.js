@@ -23,7 +23,7 @@ let RedisService = class RedisService {
     constructor(redis) {
         this.redis = redis;
     }
-    async setRefreshToken(userId, token, ttl = 7 * 24 * 3600) {
+    async setRefreshToken(userId, token, ttl = 2 * 24 * 3600) {
         return await this.redis.set(`refresh:${userId}`, token, 'EX', ttl);
     }
     async getRefreshToken(userId) {
