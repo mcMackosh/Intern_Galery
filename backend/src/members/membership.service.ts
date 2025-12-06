@@ -1,37 +1,49 @@
-import { Injectable, InternalServerErrorException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+    Injectable,
+    InternalServerErrorException,
+    BadRequestException,
+    NotFoundException,
+    ForbiddenException,
+} from '@nestjs/common';
 import { Membership, UserRole } from 'prisma/__generated__';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class MembershipService {
-    constructor(private prisma: PrismaService) { }
+    constructor(private prisma: PrismaService) {}
 
     async createOrUpdateMembership(
         userId: string,
         galleryId: string,
-        role: UserRole = UserRole.REGULAR,
+        role: UserRole,
+        currentUserRole: UserRole,
     ) {
         let existing: Membership | null = null;
 
         try {
             existing = await this.prisma.membership.findUnique({
                 where: { galleryId_userId: { galleryId, userId } },
+                include: { user: true },
             });
         } catch {
             throw new InternalServerErrorException('Failed to check existing membership');
         }
 
-        if (existing) {
-            if (existing.role === UserRole.ADMIN && role === UserRole.REGULAR) {
-                const adminCount = await this.prisma.membership.count({
-                    where: { galleryId, role: UserRole.ADMIN },
-                });
-
-                if (adminCount <= 1) {
-                    throw new BadRequestException('Gallery must have at least one admin');
-                }
+        if (currentUserRole === UserRole.ADMIN) {
+            if (existing && existing.role !== UserRole.REGULAR) {
+                throw new ForbiddenException('Admin can manage only REGULAR members');
             }
 
+            if (role !== UserRole.REGULAR) {
+                throw new ForbiddenException('Admin can assign only REGULAR role');
+            }
+        }
+
+        if (existing?.role === UserRole.OWNER && currentUserRole !== UserRole.OWNER) {
+            throw new ForbiddenException('Only OWNER can modify OWNER membership');
+        }
+
+        if (existing) {
             try {
                 return await this.prisma.membership.update({
                     where: { galleryId_userId: { galleryId, userId } },
@@ -56,14 +68,7 @@ export class MembershipService {
             const memberships = await this.prisma.membership.findMany({
                 where: { galleryId },
                 include: {
-                    user: {
-                        select: {
-                            id: true,
-                            firstName: true,
-                            lastName: true,
-                            email: true,
-                        },
-                    },
+                    user: { select: { id: true, firstName: true, lastName: true, email: true } },
                 },
             });
 
@@ -79,23 +84,23 @@ export class MembershipService {
         }
     }
 
-    async deleteMembership(galleryId: string, userId: string) {
+    async deleteMembership(
+        galleryId: string,
+        userId: string,
+        currentUserRole: UserRole,
+    ) {
         const membership = await this.prisma.membership.findUnique({
             where: { galleryId_userId: { galleryId, userId } },
         });
 
-        if (!membership) {
-            throw new NotFoundException('Membership not found');
+        if (!membership) throw new NotFoundException('Membership not found');
+
+        if (currentUserRole === UserRole.ADMIN && membership.role !== UserRole.REGULAR) {
+            throw new ForbiddenException('Admin can delete only REGULAR members');
         }
 
-        if (membership.role === UserRole.ADMIN) {
-            const adminCount = await this.prisma.membership.count({
-                where: { galleryId, role: UserRole.ADMIN },
-            });
-
-            if (adminCount <= 1) {
-                throw new BadRequestException('Cannot delete the last admin of the gallery');
-            }
+        if (membership.role === UserRole.OWNER && currentUserRole !== UserRole.OWNER) {
+            throw new ForbiddenException('Only OWNER can delete OWNER');
         }
 
         try {

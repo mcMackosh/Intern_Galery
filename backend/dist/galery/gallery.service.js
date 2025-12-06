@@ -26,7 +26,7 @@ let GalleryService = class GalleryService {
                     memberships: {
                         create: {
                             userId: creatorId,
-                            role: __generated__1.UserRole.ADMIN,
+                            role: __generated__1.UserRole.OWNER,
                         },
                     },
                 },
@@ -36,8 +36,9 @@ let GalleryService = class GalleryService {
             throw new common_1.InternalServerErrorException('Failed to create gallery');
         }
     }
-    async getAllGalleries(userId) {
+    async getAllGalleries(userId, page, limit) {
         try {
+            const skip = (page - 1) * limit;
             const galleries = await this.prisma.gallery.findMany({
                 where: {
                     memberships: {
@@ -50,8 +51,18 @@ let GalleryService = class GalleryService {
                         select: { role: true },
                     },
                 },
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
             });
-            return galleries.map(gallery => {
+            const totalCount = await this.prisma.gallery.count({
+                where: {
+                    memberships: {
+                        some: { userId },
+                    },
+                },
+            });
+            const formattedGalleries = galleries.map(gallery => {
                 const role = gallery.memberships[0]?.role || null;
                 const { memberships, ...galleryWithoutMemberships } = gallery;
                 return {
@@ -59,8 +70,17 @@ let GalleryService = class GalleryService {
                     role,
                 };
             });
+            return {
+                data: formattedGalleries,
+                meta: {
+                    total: totalCount,
+                    page,
+                    limit,
+                    totalPages: Math.ceil(totalCount / limit),
+                },
+            };
         }
-        catch {
+        catch (err) {
             throw new common_1.InternalServerErrorException('Failed to fetch galleries');
         }
     }

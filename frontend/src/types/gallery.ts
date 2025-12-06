@@ -6,3 +6,13 @@ export interface IGallery {
   description: string;
   role: UserRole;
 }
+
+export interface IGalleryListResponse {
+  data: IGallery[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}

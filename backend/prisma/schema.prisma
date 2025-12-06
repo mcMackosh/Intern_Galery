@@ -49,4 +49,5 @@ model Membership {
 enum UserRole {
   REGULAR
   ADMIN
+  OWNER
 }

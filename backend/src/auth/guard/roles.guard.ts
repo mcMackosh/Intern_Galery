@@ -8,6 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
+import { UserRole } from 'prisma/__generated__';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -28,23 +29,28 @@ export class RolesGuard implements CanActivate {
     const user = request.user;
 
     const galleryId = request.params.galleryId as string;
-    
+
     if (!user || !user.userId || !galleryId) {
       throw new ForbiddenException('User or gallery ID not found');
     }
 
     const membership = await this.prisma.membership.findFirst({
-      where: {
-        userId: user.userId,
-        galleryId : galleryId
-      },
+      where: { userId: user.userId, galleryId },
     });
 
     if (!membership) {
       throw new ForbiddenException('User is not a member of the gallery');
     }
 
-    if (!requiredRoles.includes(membership.role)) {
+    const currentRole = membership.role;
+    request.galleryRole = currentRole;
+
+    if (currentRole === UserRole.OWNER) {
+      return true;
+    }
+    const endpointAllows = requiredRoles.includes(currentRole);
+
+    if (!endpointAllows) {
       throw new ForbiddenException('Not enough permissions');
     }
 

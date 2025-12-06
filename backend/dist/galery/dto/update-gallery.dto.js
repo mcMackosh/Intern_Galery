@@ -22,8 +22,11 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateGalleryDto.prototype, "title", void 0);
 __decorate([
+    (0, class_validator_1.ValidateIf)((_, value) => value !== "" && value !== undefined),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(3, 50),
+    (0, class_validator_1.Length)(3, 50, {
+        message: "Description must be between 10 and 255 characters",
+    }),
     __metadata("design:type", String)
 ], UpdateGalleryDto.prototype, "description", void 0);
 //# sourceMappingURL=update-gallery.dto.js.map

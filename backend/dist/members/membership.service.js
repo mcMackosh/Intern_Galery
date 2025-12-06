@@ -18,25 +18,29 @@ let MembershipService = class MembershipService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async createOrUpdateMembership(userId, galleryId, role = __generated__1.UserRole.REGULAR) {
+    async createOrUpdateMembership(userId, galleryId, role, currentUserRole) {
         let existing = null;
         try {
             existing = await this.prisma.membership.findUnique({
                 where: { galleryId_userId: { galleryId, userId } },
+                include: { user: true },
             });
         }
         catch {
             throw new common_1.InternalServerErrorException('Failed to check existing membership');
         }
-        if (existing) {
-            if (existing.role === __generated__1.UserRole.ADMIN && role === __generated__1.UserRole.REGULAR) {
-                const adminCount = await this.prisma.membership.count({
-                    where: { galleryId, role: __generated__1.UserRole.ADMIN },
-                });
-                if (adminCount <= 1) {
-                    throw new common_1.BadRequestException('Gallery must have at least one admin');
-                }
+        if (currentUserRole === __generated__1.UserRole.ADMIN) {
+            if (existing && existing.role !== __generated__1.UserRole.REGULAR) {
+                throw new common_1.ForbiddenException('Admin can manage only REGULAR members');
             }
+            if (role !== __generated__1.UserRole.REGULAR) {
+                throw new common_1.ForbiddenException('Admin can assign only REGULAR role');
+            }
+        }
+        if (existing?.role === __generated__1.UserRole.OWNER && currentUserRole !== __generated__1.UserRole.OWNER) {
+            throw new common_1.ForbiddenException('Only OWNER can modify OWNER membership');
+        }
+        if (existing) {
             try {
                 return await this.prisma.membership.update({
                     where: { galleryId_userId: { galleryId, userId } },
@@ -61,14 +65,7 @@ let MembershipService = class MembershipService {
             const memberships = await this.prisma.membership.findMany({
                 where: { galleryId },
                 include: {
-                    user: {
-                        select: {
-                            id: true,
-                            firstName: true,
-                            lastName: true,
-                            email: true,
-                        },
-                    },
+                    user: { select: { id: true, firstName: true, lastName: true, email: true } },
                 },
             });
             return memberships.map((m) => ({
@@ -83,20 +80,17 @@ let MembershipService = class MembershipService {
             throw new common_1.InternalServerErrorException('Failed to fetch memberships');
         }
     }
-    async deleteMembership(galleryId, userId) {
+    async deleteMembership(galleryId, userId, currentUserRole) {
         const membership = await this.prisma.membership.findUnique({
             where: { galleryId_userId: { galleryId, userId } },
         });
-        if (!membership) {
+        if (!membership)
             throw new common_1.NotFoundException('Membership not found');
+        if (currentUserRole === __generated__1.UserRole.ADMIN && membership.role !== __generated__1.UserRole.REGULAR) {
+            throw new common_1.ForbiddenException('Admin can delete only REGULAR members');
         }
-        if (membership.role === __generated__1.UserRole.ADMIN) {
-            const adminCount = await this.prisma.membership.count({
-                where: { galleryId, role: __generated__1.UserRole.ADMIN },
-            });
-            if (adminCount <= 1) {
-                throw new common_1.BadRequestException('Cannot delete the last admin of the gallery');
-            }
+        if (membership.role === __generated__1.UserRole.OWNER && currentUserRole !== __generated__1.UserRole.OWNER) {
+            throw new common_1.ForbiddenException('Only OWNER can delete OWNER');
         }
         try {
             await this.prisma.membership.delete({

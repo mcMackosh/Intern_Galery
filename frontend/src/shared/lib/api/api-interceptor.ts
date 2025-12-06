@@ -66,7 +66,7 @@ api.interceptors.response.use(
       isRefreshing = false;
       removeAccessToken();
 
-      // window.location.replace('/login');
+      window.location.replace('/login');
 
       return Promise.reject(refreshError);
     }

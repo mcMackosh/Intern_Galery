@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Put, Delete, Query } from '@nestjs/common';
 import { GalleryService } from './gallery.service';
 import { CreateGalleryDto } from './dto/create-gallery.dto';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
@@ -10,7 +10,7 @@ import { Authorization } from 'src/auth/decorators/auth.decorator';
 export class GalleryController {
   constructor(private readonly galleryService: GalleryService) { }
 
-  @UseGuards(AuthGuard)
+  @Authorization('ADMIN', 'OWNER', 'REGULAR')
   @Get('/:galleryId')
   async getGallery(
     @Param('galleryId') galleryId: string,
@@ -32,27 +32,31 @@ export class GalleryController {
 
   @Authorization()
   @Get()
-  async getAllGaleries(@Authorized('userId') userId: string) {
-    const galeries = await this.galleryService.getAllGalleries(userId);
+  async getAllGaleries(
+    @Authorized('userId') userId: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 3,
+  ) {
+    const galeries = await this.galleryService.getAllGalleries(userId, page, limit);
     return galeries;
   }
 
-  @Authorization('ADMIN')
+  @Authorization('ADMIN', 'OWNER')
   @Put(':galleryId')
   async updateGallery(
     @Param('galleryId') galleryId: string,
     @Body() dto: UpdateGalleryDto
-  ){
-    
+  ) {
+
     const gallery = await this.galleryService.updateGallery(galleryId, dto);
     return gallery;
   }
 
-  @Authorization('ADMIN', 'REGULAR')
+  @Authorization('OWNER')
   @Delete(':galleryId')
   async deleteGallery(
     @Param('galleryId') galleryId: string
-  ){
+  ) {
     await this.galleryService.deleteGallery(galleryId);
     return true;
   }

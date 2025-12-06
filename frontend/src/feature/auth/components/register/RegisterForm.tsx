@@ -73,7 +73,7 @@ export const RegisterForm = () => {
           {...register("confirmPassword")}
           error={errors.confirmPassword?.message}
         />
-        <Button disabled={isLoading}>{isLoading ? 'Registering...' : 'Register'}</Button>
+        <Button type="submit" disabled={isLoading} className="w-full px-5 py-3 flex justify-center items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95">{isLoading ? 'Registering...' : 'Register'}</Button>
       </form>
     </AuthWrapper>
   );

@@ -20,7 +20,7 @@ export class GalleryService {
           memberships: {
             create: {
               userId: creatorId,
-              role: UserRole.ADMIN,
+              role: UserRole.OWNER,
             },
           },
         },
@@ -30,8 +30,10 @@ export class GalleryService {
     }
   }
 
-  async getAllGalleries(userId: string) {
+  async getAllGalleries(userId: string, page: number, limit: number) {
     try {
+      const skip = (page - 1) * limit;
+
       const galleries = await this.prisma.gallery.findMany({
         where: {
           memberships: {
@@ -44,9 +46,20 @@ export class GalleryService {
             select: { role: true },
           },
         },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
       });
 
-      return galleries.map(gallery => {
+      const totalCount = await this.prisma.gallery.count({
+        where: {
+          memberships: {
+            some: { userId },
+          },
+        },
+      });
+
+      const formattedGalleries = galleries.map(gallery => {
         const role = gallery.memberships[0]?.role || null;
         const { memberships, ...galleryWithoutMemberships } = gallery;
 
@@ -55,10 +68,21 @@ export class GalleryService {
           role,
         };
       });
-    } catch {
+
+      return {
+        data: formattedGalleries,
+        meta: {
+          total: totalCount,
+          page,
+          limit,
+          totalPages: Math.ceil(totalCount / limit),
+        },
+      };
+    } catch (err) {
       throw new InternalServerErrorException('Failed to fetch galleries');
     }
   }
+
 
   async getGalleryInfoById(id: string, userId: string) {
     try {

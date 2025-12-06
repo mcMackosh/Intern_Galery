@@ -13,11 +13,11 @@ export declare class MembershipController {
     createOrUpdate(body: {
         userId: string;
         role?: UserRole;
-    }, galleryId: string): Promise<{
+    }, galleryId: string, currentUserRole: UserRole): Promise<{
         userId: string;
         role: import("prisma/__generated__").$Enums.UserRole;
         galleryId: string;
     }>;
-    remove(galleryId: string, userId: string, myuserId: string): Promise<boolean>;
-    removeMe(galleryId: string, userId: string): Promise<boolean>;
+    remove(galleryId: string, userId: string, currentUserRole: UserRole): Promise<boolean>;
+    removeMe(galleryId: string, userId: string, currentUserRole: UserRole): Promise<boolean>;
 }

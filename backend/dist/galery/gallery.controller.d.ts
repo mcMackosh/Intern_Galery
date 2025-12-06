@@ -19,14 +19,22 @@ export declare class GalleryController {
         description: string | null;
         title: string;
     }>;
-    getAllGaleries(userId: string): Promise<{
-        role: import("prisma/__generated__").$Enums.UserRole;
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string | null;
-        title: string;
-    }[]>;
+    getAllGaleries(userId: string, page?: number, limit?: number): Promise<{
+        data: {
+            role: import("prisma/__generated__").$Enums.UserRole;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string | null;
+            title: string;
+        }[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+    }>;
     updateGallery(galleryId: string, dto: UpdateGalleryDto): Promise<{
         id: string;
         createdAt: Date;

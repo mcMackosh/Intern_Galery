@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const roles_decorator_1 = require("../decorators/roles.decorator");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const __generated__1 = require("../../../prisma/__generated__/index.js");
 let RolesGuard = class RolesGuard {
     reflector;
     prisma;
@@ -35,15 +36,18 @@ let RolesGuard = class RolesGuard {
             throw new common_1.ForbiddenException('User or gallery ID not found');
         }
         const membership = await this.prisma.membership.findFirst({
-            where: {
-                userId: user.userId,
-                galleryId: galleryId
-            },
+            where: { userId: user.userId, galleryId },
         });
         if (!membership) {
             throw new common_1.ForbiddenException('User is not a member of the gallery');
         }
-        if (!requiredRoles.includes(membership.role)) {
+        const currentRole = membership.role;
+        request.galleryRole = currentRole;
+        if (currentRole === __generated__1.UserRole.OWNER) {
+            return true;
+        }
+        const endpointAllows = requiredRoles.includes(currentRole);
+        if (!endpointAllows) {
             throw new common_1.ForbiddenException('Not enough permissions');
         }
         return true;

@@ -6,9 +6,10 @@ import { Loader2 } from "lucide-react";
 import { useMyProfile } from "../hooks/useMyProfile";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 import { ProfileFormData, profileSchema } from "../schemas/profileSchema";
-import { zodResolver } from "@hookform/resolvers/zod"; 
+import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@/shared/ui/Input";
 import Button from "@/shared/ui/Buton";
+import UserIdCopy from "./UserId";
 
 const ProfileForm = () => {
   const { data: profile, isLoading } = useMyProfile();
@@ -63,7 +64,7 @@ const ProfileForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      
+      <UserIdCopy userId={profile?.id}/>
       <Input
         label="First Name"
         disabled={updateMutation.isPending}
@@ -102,7 +103,9 @@ const ProfileForm = () => {
         error={errors.confirmPassword?.message}
       />
 
-      <Button disabled={updateMutation.isPending}>
+      <Button className="w-full px-5 py-3 flex justify-center items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
+        variant="default"
+        disabled={updateMutation.isPending}>
         {updateMutation.isPending ? "Updating..." : "Update Profile"}
       </Button>
 

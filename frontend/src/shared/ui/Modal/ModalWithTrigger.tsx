@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, ReactNode } from "react";
+import { ReactNode } from "react";
 import { BaseModal } from "./BaseModal";
 
 interface ModalWithTriggerProps {
@@ -9,6 +9,10 @@ interface ModalWithTriggerProps {
     children: ReactNode;
     buttonClassName?: string;
     modalClassName?: string;
+
+    isOpen: boolean;
+    onOpen: () => void;
+    onClose: () => void;
 }
 
 export const ModalWithTrigger = ({
@@ -17,16 +21,17 @@ export const ModalWithTrigger = ({
     children,
     buttonClassName = "",
     modalClassName = "",
+    isOpen,
+    onOpen,
+    onClose,
 }: ModalWithTriggerProps) => {
-    const [isOpen, setIsOpen] = useState(false);
-
     return (
         <>
             <button
-                onClick={() => setIsOpen(true)}
+                onClick={onOpen}
                 className={`
-                    flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-900 
-                  text-white px-5 py-3 rounded-xl shadow-lg 
+                    flex items-center gap-2 bg-blue-600
+                    text-white px-5 py-3 rounded-xl shadow-lg 
                     hover:scale-105 transition-all duration-200
                     ${buttonClassName}
                 `}
@@ -34,7 +39,8 @@ export const ModalWithTrigger = ({
                 {buttonIcon}
                 {buttonText}
             </button>
-            <BaseModal isOpen={isOpen} onClose={() => setIsOpen(false)} className={modalClassName}>
+
+            <BaseModal isOpen={isOpen} onClose={onClose} className={modalClassName}>
                 {children}
             </BaseModal>
         </>

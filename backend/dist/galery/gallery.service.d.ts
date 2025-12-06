@@ -11,14 +11,22 @@ export declare class GalleryService {
         description: string | null;
         title: string;
     }>;
-    getAllGalleries(userId: string): Promise<{
-        role: import("prisma/__generated__").$Enums.UserRole;
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string | null;
-        title: string;
-    }[]>;
+    getAllGalleries(userId: string, page: number, limit: number): Promise<{
+        data: {
+            role: import("prisma/__generated__").$Enums.UserRole;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string | null;
+            title: string;
+        }[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+    }>;
     getGalleryInfoById(id: string, userId: string): Promise<{
         role: import("prisma/__generated__").$Enums.UserRole;
         id: string;

@@ -16,6 +16,7 @@ export function useMemberships() {
     queryFn: () => membershipService.getAll(spaceId as string),
   });
 
+
   useEffect(() => {
     if (query.isError) {
       toastMessage((query.error as Error));

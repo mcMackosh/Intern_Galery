@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const membership_service_1 = require("./membership.service");
 const auth_decorator_1 = require("../auth/decorators/auth.decorator");
 const authorized_decorator_1 = require("../auth/decorators/authorized.decorator");
+const __generated__1 = require("../../prisma/__generated__/index.js");
 let MembershipController = class MembershipController {
     membershipService;
     constructor(membershipService) {
@@ -25,19 +26,20 @@ let MembershipController = class MembershipController {
     findAll(galleryId) {
         return this.membershipService.getAllMemberships(galleryId);
     }
-    createOrUpdate(body, galleryId) {
-        return this.membershipService.createOrUpdateMembership(body.userId, galleryId, body.role);
+    createOrUpdate(body, galleryId, currentUserRole) {
+        const targetRole = body.role ?? __generated__1.UserRole.REGULAR;
+        return this.membershipService.createOrUpdateMembership(body.userId, galleryId, targetRole, currentUserRole);
     }
-    remove(galleryId, userId, myuserId) {
-        return this.membershipService.deleteMembership(galleryId, userId);
+    remove(galleryId, userId, currentUserRole) {
+        return this.membershipService.deleteMembership(galleryId, userId, currentUserRole);
     }
-    removeMe(galleryId, userId) {
-        return this.membershipService.deleteMembership(galleryId, userId);
+    removeMe(galleryId, userId, currentUserRole) {
+        return this.membershipService.deleteMembership(galleryId, userId, currentUserRole);
     }
 };
 exports.MembershipController = MembershipController;
 __decorate([
-    (0, auth_decorator_1.Authorization)('ADMIN', 'REGULAR'),
+    (0, auth_decorator_1.Authorization)('ADMIN', 'REGULAR', 'OWNER'),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Param)('galleryId')),
     __metadata("design:type", Function),
@@ -45,31 +47,33 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MembershipController.prototype, "findAll", null);
 __decorate([
-    (0, auth_decorator_1.Authorization)('ADMIN'),
+    (0, auth_decorator_1.Authorization)('ADMIN', 'OWNER'),
     (0, common_1.Post)('create-or-update'),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Param)('galleryId')),
+    __param(2, (0, authorized_decorator_1.Authorized)('role')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", void 0)
 ], MembershipController.prototype, "createOrUpdate", null);
 __decorate([
-    (0, auth_decorator_1.Authorization)('ADMIN'),
+    (0, auth_decorator_1.Authorization)('ADMIN', 'OWNER'),
     (0, common_1.Delete)(':userId'),
     __param(0, (0, common_1.Param)('galleryId')),
     __param(1, (0, common_1.Param)('userId')),
-    __param(2, (0, authorized_decorator_1.Authorized)('userId')),
+    __param(2, (0, authorized_decorator_1.Authorized)('role')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", void 0)
 ], MembershipController.prototype, "remove", null);
 __decorate([
-    (0, auth_decorator_1.Authorization)(),
+    (0, auth_decorator_1.Authorization)('OWNER'),
     (0, common_1.Delete)(),
     __param(0, (0, common_1.Param)('galleryId')),
     __param(1, (0, authorized_decorator_1.Authorized)('userId')),
+    __param(2, (0, authorized_decorator_1.Authorized)('role')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", void 0)
 ], MembershipController.prototype, "removeMe", null);
 exports.MembershipController = MembershipController = __decorate([

@@ -49,7 +49,7 @@ export const LoginForm = () => {
           error={errors.password?.message}
         />
 
-        <Button disabled={isLoading}>
+        <Button disabled={isLoading} type="submit" className="w-full px-5 py-3 flex justify-center items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95">
           Login
         </Button>
       </form>

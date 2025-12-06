@@ -1,10 +1,13 @@
 import { TypeCreateGalleryScheme, TypeUpdateGalleryScheme } from "@/feature/gallery/schemes/gallery.shemes";
 import api from "@/shared/lib/api/api-interceptor";
-import { IGallery } from "@/types/gallery";
+import { IGallery, IGalleryListResponse } from "@/types/gallery";
+import { CONFIG } from "./config";
 
 class GalleryService {
-  public async getAllGalleries() {
-    const { data } = await api.get<IGallery[]>("/gallery");
+  public async getAllGalleries(page = 1): Promise<IGalleryListResponse> {
+    const {data} = await api.get<IGalleryListResponse>("/gallery", {
+      params: { page, limit: CONFIG.limit_item_queary },
+    });
     return data;
   }
 
@@ -13,8 +16,8 @@ class GalleryService {
   }
 
   public async getGallery(galleryId: string) {
-     const { data } = await api.get<IGallery>(`/gallery/${galleryId}`);
-     return data;
+    const { data } = await api.get<IGallery>(`/gallery/${galleryId}`);
+    return data;
   }
 
   public async updateGallery(galleryId: string, dto: TypeUpdateGalleryScheme) {

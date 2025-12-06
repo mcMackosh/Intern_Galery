@@ -14,10 +14,12 @@ import { useOneGallery } from "../../hooks/useOneGallery";
 
 interface UpdateGalleryFormProps {
   galleryId?: string;
+  onSuccess?: () => void
 }
 
 export const UpdateGalleryForm = ({
   galleryId,
+  onSuccess
 }: UpdateGalleryFormProps) => {
   const { gallery, isLoading: galleryLoading } = useOneGallery(galleryId);
 
@@ -43,6 +45,7 @@ export const UpdateGalleryForm = ({
 
   const onSubmit = (data: TypeUpdateGalleryScheme) => {
     updateGallery(data);
+    onSuccess?.()
   };
 
   if (galleryLoading) {

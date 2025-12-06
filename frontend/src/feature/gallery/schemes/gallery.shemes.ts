@@ -8,7 +8,8 @@ export const createGallerySchema = z.object({
   description: z
     .string()
     .min(10, "Description must be at least 10 characters")
-    .max(255, "Description must be at most 255 characters"),
+    .max(255, "Description must be at most 255 characters")
+    .or(z.literal("")),
 });
 
 export const updateGallerySchema = z.object({
@@ -16,10 +17,10 @@ export const updateGallerySchema = z.object({
     .string()
     .min(2, "Title must be at least 2 characters")
     .max(50, "Title must be at most 50 characters"),
-  description: z
-    .string()
+  description: z.string()
     .min(10, "Description must be at least 10 characters")
     .max(255, "Description must be at most 255 characters")
+    .or(z.literal(""))
 });
 
 export type TypeCreateGalleryScheme = z.infer<typeof createGallerySchema>;

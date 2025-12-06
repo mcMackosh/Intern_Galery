@@ -8,41 +8,54 @@ import { UserRole } from 'prisma/__generated__';
 export class MembershipController {
   constructor(private membershipService: MembershipService) {}
 
-  @Authorization('ADMIN', 'REGULAR')
+  @Authorization('ADMIN', 'REGULAR', 'OWNER')
   @Get()
   findAll(@Param('galleryId') galleryId: string) {
     return this.membershipService.getAllMemberships(galleryId);
   }
 
-  @Authorization('ADMIN')
+  @Authorization('ADMIN', 'OWNER')
   @Post('create-or-update')
   createOrUpdate(
     @Body() body: { userId: string; role?: UserRole },
     @Param('galleryId') galleryId: string,
+    @Authorized('role') currentUserRole: UserRole,
   ) {
+    const targetRole = body.role ?? UserRole.REGULAR;
+
     return this.membershipService.createOrUpdateMembership(
       body.userId,
       galleryId,
-      body.role,
+      targetRole,
+      currentUserRole,
     );
   }
 
-  @Authorization('ADMIN')
+  @Authorization('ADMIN', 'OWNER')
   @Delete(':userId')
   remove(
     @Param('galleryId') galleryId: string,
     @Param('userId') userId: string,
-    @Authorized('userId') myuserId: string,
+    @Authorized('role') currentUserRole: UserRole,
   ) {
-    return this.membershipService.deleteMembership(galleryId, userId);
+    return this.membershipService.deleteMembership(
+      galleryId,
+      userId,
+      currentUserRole,
+    );
   }
 
-  @Authorization()
+  @Authorization('OWNER')
   @Delete()
   removeMe(
     @Param('galleryId') galleryId: string,
     @Authorized('userId') userId: string,
+    @Authorized('role') currentUserRole: UserRole,
   ) {
-    return this.membershipService.deleteMembership(galleryId, userId);
+    return this.membershipService.deleteMembership(
+      galleryId,
+      userId,
+      currentUserRole,
+    );
   }
 }

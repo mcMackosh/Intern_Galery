@@ -6,6 +6,7 @@ interface ButtonProps {
   variant?: 'default' | 'danger' | 'success' | 'secondary'
   type?: 'button' | 'submit' | 'reset'
   onClick?: () => void
+  className?: string
 }
 
 export const Button = ({
@@ -14,14 +15,15 @@ export const Button = ({
   variant = 'default',
   type = 'button',
   onClick,
+  className
 }: ButtonProps) => {
-  const baseClasses = 'w-full py-2 text-white rounded-md focus:outline-none focus:ring-2 transition'
+  const baseClasses = 'py-2 text-white rounded-md focus:outline-none focus:ring-2 transition'
 
   const variantClasses: Record<string, string> = {
-    default: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
-    danger: 'bg-red-500 hover:bg-red-600 focus:ring-red-400',
-    success: 'bg-green-600 hover:bg-green-700 focus:ring-green-400',
-    secondary: 'bg-gray-500 hover:bg-gray-600 focus:ring-gray-400',
+    default: 'bg-blue-600 hover:bg-blue-700 ',
+    danger: 'bg-red-500 hover:bg-red-600',
+    success: 'bg-green-600 hover:bg-green-700',
+    secondary: 'bg-gray-500 hover:bg-gray-600',
   }
 
   return (
@@ -29,7 +31,7 @@ export const Button = ({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`${baseClasses} ${disabled ? 'bg-gray-400 cursor-not-allowed' : variantClasses[variant]}`}
+      className={`${baseClasses} ${disabled ? 'bg-gray-400 cursor-not-allowed' : variantClasses[variant]} ${className || ''}`}
     >
       {children}
     </button>

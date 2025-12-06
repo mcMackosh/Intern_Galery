@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export declare class MembershipService {
     private prisma;
     constructor(prisma: PrismaService);
-    createOrUpdateMembership(userId: string, galleryId: string, role?: UserRole): Promise<{
+    createOrUpdateMembership(userId: string, galleryId: string, role: UserRole, currentUserRole: UserRole): Promise<{
         userId: string;
         role: import("prisma/__generated__").$Enums.UserRole;
         galleryId: string;
@@ -15,5 +15,5 @@ export declare class MembershipService {
         email: string;
         role: import("prisma/__generated__").$Enums.UserRole;
     }[]>;
-    deleteMembership(galleryId: string, userId: string): Promise<boolean>;
+    deleteMembership(galleryId: string, userId: string, currentUserRole: UserRole): Promise<boolean>;
 }

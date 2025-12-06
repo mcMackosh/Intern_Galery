@@ -1,7 +1,8 @@
 
 export enum UserRole {
   ADMIN = 'ADMIN',
-  REGULAR = 'REGULAR'
+  REGULAR = 'REGULAR',
+  OWNER = 'OWNER'
 }
 
 export interface IMembershipRequestUpdate {
