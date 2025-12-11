@@ -4,9 +4,9 @@ import { IGallery, IGalleryListResponse } from "@/types/gallery";
 import { CONFIG } from "./config";
 
 class GalleryService {
-  public async getAllGalleries(page = 1): Promise<IGalleryListResponse> {
+  public async getAllGalleries(page = 1, signal?: AbortSignal): Promise<IGalleryListResponse> {
     const {data} = await api.get<IGalleryListResponse>("/gallery", {
-      params: { page, limit: CONFIG.limit_item_queary },
+      params: { page, limit: CONFIG.limit_item_queary }, signal
     });
     return data;
   }

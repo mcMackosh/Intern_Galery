@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
 import React from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { setPage } from "@/store/slices/paginationSlice";
 import { useGalleries } from "../../hooks/useGallery";
 import GalleryCard from "./GalleryCard";
-import { Pagination } from "./Pagination";
+import { ChevronRight, ChevronLeft } from "lucide-react";
+import { PaginationComponent } from "./Pagination";
 
 export default function GalleryList() {
     const page = useSelector((state: any) => state.pagination.page);
-    const dispatch = useDispatch();
 
     const { data, meta, isLoading, isError, refetch } = useGalleries(page);
 
@@ -37,22 +37,19 @@ export default function GalleryList() {
         );
     }
 
+    console.log('redner')
+
     return (
         <div className="max-w-6xl mx-auto px-4 py-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(data ?? []).map((gallery) => (
-                    <div key={gallery.id} className="cursor-pointer">
-                        <GalleryCard gallery={gallery} />
-                    </div>
+                {data?.map((gallery) => (
+                    <GalleryCard key={gallery.id} gallery={gallery} />
                 ))}
             </div>
 
-            <Pagination
-                page={page}
-                totalPages={meta?.totalPages ?? 1}
-                onPageChange={(newPage) => dispatch(setPage(newPage))}
-                
-            />
+            {meta && meta.totalPages > 0 && (
+                <PaginationComponent totalPages={meta.totalPages} />
+            )}
         </div>
     );
 }

@@ -1,5 +1,6 @@
 import { Clipboard } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const UserIdCopy = ({ userId }: { userId?: string }) => {
   const [copied, setCopied] = useState(false);
@@ -8,6 +9,7 @@ const UserIdCopy = ({ userId }: { userId?: string }) => {
     if (!userId) return;
     navigator.clipboard.writeText(userId);
     setCopied(true);
+    toast.success("User ID copied!");
     setTimeout(() => setCopied(false), 1500);
   };
 

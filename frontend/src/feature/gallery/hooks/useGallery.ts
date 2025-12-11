@@ -6,7 +6,7 @@ import { IGalleryListResponse } from '@/types/gallery';
 export const useGalleries = (page: number) => {
   const options: UseQueryOptions<IGalleryListResponse, Error> = {
     queryKey: ['galleries', page],
-    queryFn: () => galleryService.getAllGalleries(page),
+    queryFn: ({ signal }) => galleryService.getAllGalleries(page, signal),
     placeholderData: keepPreviousData,
     staleTime: 5000
   };
