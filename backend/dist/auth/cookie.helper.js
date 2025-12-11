@@ -13,7 +13,11 @@ function setRefreshTokenCookie(res, token, maxAge = 2 * 24 * 3600 * 1000) {
     });
 }
 function clearRefreshTokenCookie(res) {
-    res.clearCookie(REFRESH_TOKEN_COOKIE);
+    res.clearCookie(REFRESH_TOKEN_COOKIE, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+    });
 }
 function getRefreshTokenFromRequest(req) {
     return req.cookies[REFRESH_TOKEN_COOKIE];

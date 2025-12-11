@@ -16,6 +16,7 @@ const profile_module_1 = require("./profile/profile.module");
 const redis_module_1 = require("./redis/redis.module");
 const galery_module_1 = require("./galery/galery.module");
 const membership_module_1 = require("./members/membership.module");
+const images_module_1 = require("./images/images.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -24,7 +25,7 @@ exports.AppModule = AppModule = __decorate([
         imports: [config_1.ConfigModule.forRoot({
                 isGlobal: true,
                 ignoreEnvFile: !is_dev_util_1.IS_DEV_ENV,
-            }), prisma_module_1.PrismaModule, auth_module_1.AuthModule, profile_module_1.ProfileModule, redis_module_1.RedisModule, galery_module_1.GalleryModule, membership_module_1.MembershipModule],
+            }), prisma_module_1.PrismaModule, auth_module_1.AuthModule, profile_module_1.ProfileModule, redis_module_1.RedisModule, galery_module_1.GalleryModule, membership_module_1.MembershipModule, images_module_1.ImagesModule],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

@@ -144,6 +144,14 @@ exports.Prisma.MembershipScalarFieldEnum = {
   role: 'role'
 };
 
+exports.Prisma.ImageScalarFieldEnum = {
+  id: 'id',
+  path: 'path',
+  originalFilename: 'originalFilename',
+  createdAt: 'createdAt',
+  galleryId: 'galleryId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -167,7 +175,8 @@ exports.UserRole = exports.$Enums.UserRole = {
 exports.Prisma.ModelName = {
   User: 'User',
   Gallery: 'Gallery',
-  Membership: 'Membership'
+  Membership: 'Membership',
+  Image: 'Image'
 };
 
 /**

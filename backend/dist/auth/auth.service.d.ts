@@ -35,7 +35,7 @@ export declare class AuthService {
         accessToken: string;
         refreshToken: string;
     }>;
-    generateToken(type: 'ACCESS' | 'REFRESH', userId: String): Promise<string>;
+    generateToken(type: 'ACCESS' | 'REFRESH', userId: string): Promise<string>;
     refreshTokens(token: string): Promise<{
         user: {
             email: string;

@@ -116,6 +116,14 @@ exports.Prisma.MembershipScalarFieldEnum = {
   role: 'role'
 };
 
+exports.Prisma.ImageScalarFieldEnum = {
+  id: 'id',
+  path: 'path',
+  originalFilename: 'originalFilename',
+  createdAt: 'createdAt',
+  galleryId: 'galleryId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -139,7 +147,8 @@ exports.UserRole = exports.$Enums.UserRole = {
 exports.Prisma.ModelName = {
   User: 'User',
   Gallery: 'Gallery',
-  Membership: 'Membership'
+  Membership: 'Membership',
+  Image: 'Image'
 };
 /**
  * Create the Client
@@ -188,13 +197,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"./__generated__\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        String   @id @default(uuid())\n  firstName String   @map(\"first_name\")\n  lastName  String   @map(\"last_name\")\n  password  String\n  email     String   @unique\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  memberships Membership[]\n\n  @@map(\"users\")\n}\n\nmodel Gallery {\n  id          String   @id @default(uuid())\n  title       String\n  description String?\n  createdAt   DateTime @default(now()) @map(\"created_at\")\n  updatedAt   DateTime @updatedAt @map(\"updated_at\")\n\n  memberships Membership[]\n\n  @@map(\"galleries\")\n}\n\nmodel Membership {\n  userId    String   @map(\"user_id\")\n  galleryId String   @map(\"gallery_id\")\n  role      UserRole @default(REGULAR)\n\n  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)\n  gallery Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)\n\n  @@id([galleryId, userId])\n  @@map(\"gallery_members\")\n}\n\nenum UserRole {\n  REGULAR\n  ADMIN\n  OWNER\n}\n",
-  "inlineSchemaHash": "5a81fd6d5498315502630dc00ef09d176c932be5a26cd0187c797c5abb017506",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"./__generated__\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        String   @id @default(uuid())\n  firstName String   @map(\"first_name\")\n  lastName  String   @map(\"last_name\")\n  password  String\n  email     String   @unique\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  memberships Membership[]\n\n  @@map(\"users\")\n}\n\nmodel Gallery {\n  id          String   @id @default(uuid())\n  title       String\n  description String?\n  createdAt   DateTime @default(now()) @map(\"created_at\")\n  updatedAt   DateTime @updatedAt @map(\"updated_at\")\n\n  memberships Membership[]\n  images      Image[]\n\n  @@map(\"galleries\")\n}\n\nmodel Membership {\n  userId    String   @map(\"user_id\")\n  galleryId String   @map(\"gallery_id\")\n  role      UserRole @default(REGULAR)\n\n  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)\n  gallery Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)\n\n  @@id([galleryId, userId])\n  @@map(\"gallery_members\")\n}\n\nmodel Image {\n  id               String   @id @default(uuid())\n  path             String\n  originalFilename String   @map(\"original_filename\")\n  createdAt        DateTime @default(now()) @map(\"created_at\")\n\n  galleryId String  @map(\"gallery_id\")\n  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)\n\n  @@map(\"images\")\n}\n\nenum UserRole {\n  REGULAR\n  ADMIN\n  OWNER\n}\n",
+  "inlineSchemaHash": "bdb04bab56bd4661064e1a9be8b693921fc03b815ec4b7a13b1b580d1af403cf",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"first_name\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"last_name\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"},{\"name\":\"memberships\",\"kind\":\"object\",\"type\":\"Membership\",\"relationName\":\"MembershipToUser\"}],\"dbName\":\"users\"},\"Gallery\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"},{\"name\":\"memberships\",\"kind\":\"object\",\"type\":\"Membership\",\"relationName\":\"GalleryToMembership\"}],\"dbName\":\"galleries\"},\"Membership\":{\"fields\":[{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"galleryId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"gallery_id\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"UserRole\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"MembershipToUser\"},{\"name\":\"gallery\",\"kind\":\"object\",\"type\":\"Gallery\",\"relationName\":\"GalleryToMembership\"}],\"dbName\":\"gallery_members\"}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"first_name\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"last_name\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"},{\"name\":\"memberships\",\"kind\":\"object\",\"type\":\"Membership\",\"relationName\":\"MembershipToUser\"}],\"dbName\":\"users\"},\"Gallery\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"},{\"name\":\"memberships\",\"kind\":\"object\",\"type\":\"Membership\",\"relationName\":\"GalleryToMembership\"},{\"name\":\"images\",\"kind\":\"object\",\"type\":\"Image\",\"relationName\":\"GalleryToImage\"}],\"dbName\":\"galleries\"},\"Membership\":{\"fields\":[{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"galleryId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"gallery_id\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"UserRole\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"MembershipToUser\"},{\"name\":\"gallery\",\"kind\":\"object\",\"type\":\"Gallery\",\"relationName\":\"GalleryToMembership\"}],\"dbName\":\"gallery_members\"},\"Image\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"path\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"originalFilename\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"original_filename\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"galleryId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"gallery_id\"},{\"name\":\"gallery\",\"kind\":\"object\",\"type\":\"Gallery\",\"relationName\":\"GalleryToImage\"}],\"dbName\":\"images\"}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

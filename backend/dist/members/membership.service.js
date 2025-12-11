@@ -20,6 +20,8 @@ let MembershipService = class MembershipService {
     }
     async createOrUpdateMembership(userId, galleryId, role, currentUserRole) {
         let existing = null;
+        if (role == __generated__1.UserRole.OWNER)
+            throw new common_1.InternalServerErrorException('Role Owner don`t assign');
         try {
             existing = await this.prisma.membership.findUnique({
                 where: { galleryId_userId: { galleryId, userId } },

@@ -30,6 +30,7 @@ model Gallery {
   updatedAt   DateTime        @updatedAt @map("updated_at")
 
   memberships Membership[]
+  images      Image[]
 
   @@map("galleries")
 }
@@ -44,6 +45,18 @@ model Membership {
 
   @@id([galleryId, userId])
   @@map("gallery_members")
+}
+
+model Image {
+  id               String    @id @default(uuid())
+  path             String
+  originalFilename String    @map("original_filename")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  galleryId        String    @map("gallery_id")
+  gallery          Gallery   @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
+  @@map("images")
 }
 
 enum UserRole {

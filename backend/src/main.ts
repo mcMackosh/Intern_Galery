@@ -5,9 +5,12 @@ import cookieParser from 'cookie-parser'
 import { json } from 'express';
 import { AppModule } from './app.module'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import multer from 'multer';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule)
 	const config = app.get(ConfigService)
 	
 	app.use(json({ limit: '10mb' }));
@@ -25,6 +28,11 @@ async function bootstrap() {
 		credentials: true,
 		exposedHeaders: ['set-cookie']
 	})
+
+	app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    	prefix: '/uploads',
+  	});
+	app.use('/galleries/:galleryId/upload', multer().array('images', 10));
 
 	const swaggerConfig = new DocumentBuilder()
     .setTitle('Auth API')

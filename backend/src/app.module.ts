@@ -7,12 +7,13 @@ import { ProfileModule } from './profile/profile.module';
 import { RedisModule } from './redis/redis.module';
 import { GalleryModule } from './galery/galery.module';
 import { MembershipModule } from './members/membership.module';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
       isGlobal: true,
       ignoreEnvFile: !IS_DEV_ENV,
-  }), PrismaModule, AuthModule, ProfileModule, RedisModule, GalleryModule, MembershipModule],
+  }), PrismaModule, AuthModule, ProfileModule, RedisModule, GalleryModule, MembershipModule, ImagesModule],
 })
 export class AppModule {}
 

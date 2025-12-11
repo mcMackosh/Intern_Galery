@@ -12,10 +12,13 @@ export function setRefreshTokenCookie(res: Response, token: string, maxAge = 2 *
 }
 
 export function clearRefreshTokenCookie(res: Response) {
-	res.clearCookie(REFRESH_TOKEN_COOKIE);
+	res.clearCookie(REFRESH_TOKEN_COOKIE, {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === 'production',
+		sameSite: 'strict',
+	});
 }
 
 export function getRefreshTokenFromRequest(req: any) {
 	return req.cookies[REFRESH_TOKEN_COOKIE];
 }
-	

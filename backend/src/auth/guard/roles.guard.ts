@@ -28,32 +28,39 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    const galleryId = request.params.galleryId as string;
+    const { galleryId, targetGalleryId } = request.params;
 
-    if (!user || !user.userId || !galleryId) {
-      throw new ForbiddenException('User or gallery ID not found');
+    if (!user?.userId) {
+      throw new ForbiddenException('User not found');
     }
 
-    const membership = await this.prisma.membership.findFirst({
-      where: { userId: user.userId, galleryId },
-    });
+    const galleryIdsToCheck = [galleryId, targetGalleryId].filter(id => id !== undefined && id !== null && id !== '');
 
-    if (!membership) {
-      throw new ForbiddenException('User is not a member of the gallery');
-    }
+    for (const gid of galleryIdsToCheck) {
+      const membership = await this.prisma.membership.findFirst({
+        where: { userId: user.userId, galleryId: gid },
+      });
 
-    const currentRole = membership.role;
-    request.galleryRole = currentRole;
+      if (!membership) {
+        throw new ForbiddenException(
+          `User has no permissions for gallery ${gid}`
+        );
+      }
 
-    if (currentRole === UserRole.OWNER) {
-      return true;
-    }
-    const endpointAllows = requiredRoles.includes(currentRole);
+      const currentRole = membership.role;
 
-    if (!endpointAllows) {
-      throw new ForbiddenException('Not enough permissions');
+      if (currentRole === UserRole.OWNER) {
+        continue;
+      }
+
+      if (!requiredRoles.includes(currentRole)) {
+        throw new ForbiddenException(
+          `Not enough permissions for gallery ${gid}`
+        );
+      }
     }
 
     return true;
   }
 }
+

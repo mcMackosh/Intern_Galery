@@ -65,11 +65,11 @@ export class AuthService {
 		return { user: newUser, accessToken, refreshToken }
 	}
 
-	async generateToken(type: 'ACCESS' | 'REFRESH', userId: String): Promise<string> {
+	async generateToken(type: 'ACCESS' | 'REFRESH', userId: string): Promise<string> {
 		const payload = { userId }
 		return this.jwtService.signAsync(payload, {
 			secret: this.configService.get('JWT_SECRET'),
-			expiresIn: type === 'ACCESS' ? '20m' : '2d',
+			expiresIn: type === 'ACCESS' ? '25m' : '2d',
 		});
 	}
 
