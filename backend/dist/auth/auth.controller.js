@@ -28,12 +28,12 @@ let AuthController = class AuthController {
     }
     async register(dto, res) {
         const { accessToken, refreshToken } = await this.authService.register(dto);
-        (0, cookie_helper_1.setRefreshTokenCookie)(res, refreshToken, 10 * 60 * 1000);
+        (0, cookie_helper_1.setRefreshTokenCookie)(res, refreshToken);
         return { accessToken };
     }
     async login(dto, res) {
         const { accessToken, refreshToken } = await this.authService.login(dto);
-        (0, cookie_helper_1.setRefreshTokenCookie)(res, refreshToken, 10 * 60 * 1000);
+        (0, cookie_helper_1.setRefreshTokenCookie)(res, refreshToken);
         return { accessToken };
     }
     async logout(userId, res) {

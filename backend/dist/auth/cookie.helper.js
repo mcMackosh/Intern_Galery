@@ -4,12 +4,12 @@ exports.setRefreshTokenCookie = setRefreshTokenCookie;
 exports.clearRefreshTokenCookie = clearRefreshTokenCookie;
 exports.getRefreshTokenFromRequest = getRefreshTokenFromRequest;
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
-function setRefreshTokenCookie(res, token, maxAge = 2 * 24 * 3600 * 1000) {
+function setRefreshTokenCookie(res, token, maxAge = 7 * 24 * 3600 * 1000) {
     res.cookie(REFRESH_TOKEN_COOKIE, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge,
+        expires: new Date(Date.now() + maxAge)
     });
 }
 function clearRefreshTokenCookie(res) {

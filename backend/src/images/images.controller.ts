@@ -9,15 +9,15 @@ import {
   Get,
   Query,
   BadRequestException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ImagesService } from './images.service';
-import { DeleteImagesDto } from './dto/delete-images.dto';
-import { MoveImagesDto } from './dto/move-images.dto';
 import { Authorization } from 'src/auth/decorators/auth.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import path from 'path';
-import { ALLOWED_EXTENSIONS } from './dto/extention.file';
+import { ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES } from './extention.file';
+import { IdsImagesDto } from './dto/ids-images.dto';
 
 @Controller('galleries/:galleryId/image')
 export class ImagesController {
@@ -25,15 +25,24 @@ export class ImagesController {
   constructor(private readonly imagesService: ImagesService) { }
 
   @Post('/upload')
+  @Authorization('ADMIN', 'OWNER')
   @UseInterceptors(
     FilesInterceptor('images', 20, {
       storage: memoryStorage(),
       fileFilter: (req, file, cb) => {
         const ext = path.extname(file.originalname).toLowerCase();
+        const mime = file.mimetype;
         if (!ALLOWED_EXTENSIONS.includes(ext)) {
           return cb(new BadRequestException('Only image files are allowed'), false);
         }
+        if (!ALLOWED_MIME_TYPES.includes(mime)) {
+          return cb(new BadRequestException('Only image files are allowed (invalid MIME type)'), false);
+        } 
         cb(null, true);
+        
+      },
+      limits: {
+        fileSize: 15 * 1024 * 1024,
       },
     }),
   )
@@ -50,15 +59,16 @@ export class ImagesController {
   @Get('')
   async getByGallery(
     @Param('galleryId') galleryId: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
+    @Query('page', ParseIntPipe) page: number,
+    @Query('limit', ParseIntPipe) limit: number,
   ) {
+
     return this.imagesService.getImagesByGallery(galleryId, page, limit);
   }
 
   @Authorization('ADMIN', 'OWNER')
   @Delete()
-  async deleteImages(@Body() body: DeleteImagesDto, @Param('galleryId') galleryId: string) {
+  async deleteImages(@Body() body: IdsImagesDto, @Param('galleryId') galleryId: string) {
     if (!body?.ids || !Array.isArray(body.ids)) {
       throw new BadRequestException('ids array is required');
     }
@@ -68,7 +78,7 @@ export class ImagesController {
   @Authorization('ADMIN', 'OWNER')
   @Post('move/:targetGalleryId')
   async moveImages(
-    @Body() body: MoveImagesDto,
+    @Body() body: IdsImagesDto,
     @Param('targetGalleryId') targetGalleryId: string,
     @Param('galleryId') galleryId: string) {
     if (!body?.ids || !Array.isArray(body.ids) || !targetGalleryId) {
@@ -80,7 +90,7 @@ export class ImagesController {
 
   @Authorization('ADMIN', 'OWNER')
   @Post('copy/:targetGalleryId')
-  async copyImages(@Body() body: MoveImagesDto,
+  async copyImages(@Body() body: IdsImagesDto,
     @Param('targetGalleryId') targetGalleryId: string,
     @Param('galleryId') galleryId: string) {
     if (!body?.ids || !Array.isArray(body.ids) || !targetGalleryId) {

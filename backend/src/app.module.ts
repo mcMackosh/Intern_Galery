@@ -5,7 +5,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { RedisModule } from './redis/redis.module';
-import { GalleryModule } from './galery/galery.module';
+import { GalleryModule } from './gallery/galery.module';
 import { MembershipModule } from './members/membership.module';
 import { ImagesModule } from './images/images.module';
 

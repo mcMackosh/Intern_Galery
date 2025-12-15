@@ -29,8 +29,7 @@ export function GalleryInfo() {
   }
 
   return (
-    <div className="space-y-6 bg-white rounded-2xl shadow-lg p-6 md:p-8">
-      {/* Title + Role */}
+    <div className="space-y-6 bg-white p-6 md:p-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
           {gallery?.title || 'Untitled Gallery'}
@@ -40,18 +39,15 @@ export function GalleryInfo() {
         </span>
       </div>
 
-      {/* Description */}
       {gallery?.description && (
         <p className="text-gray-700 text-base md:text-lg leading-relaxed border-l-4 border-indigo-300 pl-4 md:pl-6">
           {gallery.description}
         </p>
       )}
 
-      {/* Buttons */}
       <div className="flex flex-row flex-wrap justify-end items-center gap-3 mt-4">
         {(gallery?.role === UserRole.ADMIN || gallery?.role === UserRole.OWNER) && (
           <>
-            {/* Edit */}
             <Button
               onClick={() => setIsEditOpen(true)}
               className="inline-flex items-center gap-2 px-5 py-2"
@@ -64,7 +60,6 @@ export function GalleryInfo() {
               <UpdateGalleryForm onSuccess={() => setIsEditOpen(false)} />
             </BaseModal>
 
-            {/* Membership */}
             <Button
               onClick={() => setIsMembershipOpen(true)}
               className="inline-flex items-center gap-2 px-5"
@@ -109,6 +104,7 @@ export function GalleryInfo() {
           </>
         )}
       </div>
+     
     </div>
   )
 }

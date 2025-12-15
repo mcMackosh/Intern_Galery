@@ -3,9 +3,10 @@ import '../shared/style/globals.css'
 import { MainProvider } from "../providers/mainProvider";
 import { Toaster } from "sonner";
 import { Header } from "@/feature/layouts/Header/Header";
+import Footer from "@/feature/layouts/Footer/Footer";
 
 export const metadata: Metadata = {
-  title: 'Galery'
+  title: 'Gallery'
 }
 
 export default function RootLayout({
@@ -15,15 +16,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen">
+      <body className="flex flex-col min-h-screen">
         <MainProvider>
           <Header />
-
-          <div className="pt-16 min-h-screen">
-            {children}
-          </div>
-
           <Toaster position="top-right" richColors />
+          <main className="flex-grow pt-16 box-border">
+            {children}
+          </main>
+          <Footer />
         </MainProvider>
       </body>
     </html>

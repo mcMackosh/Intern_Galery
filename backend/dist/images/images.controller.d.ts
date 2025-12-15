@@ -1,6 +1,5 @@
 import { ImagesService } from './images.service';
-import { DeleteImagesDto } from './dto/delete-images.dto';
-import { MoveImagesDto } from './dto/move-images.dto';
+import { IdsImagesDto } from './dto/ids-images.dto';
 export declare class ImagesController {
     private readonly imagesService;
     constructor(imagesService: ImagesService);
@@ -11,7 +10,7 @@ export declare class ImagesController {
         galleryId: string;
         originalFilename: string;
     }[]>;
-    getByGallery(galleryId: string, page?: number, limit?: number): Promise<{
+    getByGallery(galleryId: string, page: number, limit: number): Promise<{
         items: {
             id: string;
             createdAt: Date;
@@ -24,17 +23,17 @@ export declare class ImagesController {
         total: number;
         totalPages: number;
     }>;
-    deleteImages(body: DeleteImagesDto, galleryId: string): Promise<{
+    deleteImages(body: IdsImagesDto, galleryId: string): Promise<{
         deleted: string[];
     }>;
-    moveImages(body: MoveImagesDto, targetGalleryId: string, galleryId: string): Promise<{
+    moveImages(body: IdsImagesDto, targetGalleryId: string, galleryId: string): Promise<{
         id: string;
         createdAt: Date;
         path: string;
         galleryId: string;
         originalFilename: string;
     }[]>;
-    copyImages(body: MoveImagesDto, targetGalleryId: string, galleryId: string): Promise<{
+    copyImages(body: IdsImagesDto, targetGalleryId: string, galleryId: string): Promise<{
         id: string;
         createdAt: Date;
         path: string;

@@ -1,6 +1,7 @@
 
 
 import { GalleryInfo } from "@/feature/gallery/components/gallery_page/GalleryInfo";
+import ImageList from "@/feature/image/components/gallery_list/ImageList";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,6 +10,9 @@ export const metadata: Metadata = {
 
 export default function GalleryPage() {
   return (
-    <GalleryInfo />
+    <div>
+      <GalleryInfo/>
+      <ImageList/>
+    </div>
   )
 }

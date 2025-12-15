@@ -28,14 +28,10 @@ export class ImagesService {
   }
 
   async uploadImages(galleryId: string, files: Express.Multer.File[]) {
-
     return this.prisma.$transaction(async (tx) => {
-      const createdImages: Image[] = [];
-
       const galleryFolder = await this.ensureGalleryFolder(galleryId);
 
-      for (const file of files) {
-
+      const uploadPromises = files.map(async (file) => {
         const fileGuid = randomUUID();
         const relativePath = path.join(galleryId, `${fileGuid}_${file.originalname}`);
 
@@ -52,7 +48,6 @@ export class ImagesService {
           throw new InternalServerErrorException(`Failed to save file: ${file.originalname}`);
         }
 
-
         const fullFilePath = path.join(galleryFolder, `${fileGuid}_${file.originalname}`);
         try {
           await fs.promises.writeFile(fullFilePath, file.buffer);
@@ -60,8 +55,10 @@ export class ImagesService {
           throw new InternalServerErrorException(`Failed to save file: ${file.originalname} to disk`);
         }
 
-        createdImages.push(image);
-      }
+        return image;
+      });
+
+      const createdImages = await Promise.all(uploadPromises);
 
       return createdImages;
     });
@@ -83,6 +80,12 @@ export class ImagesService {
         );
       }
 
+      await tx.image.deleteMany({
+        where: {
+          id: { in: ids }
+        },
+      });
+
       for (const img of images) {
         const fullPath = path.join(this.UPLOAD_ROOT, img.path);
         try {
@@ -91,12 +94,6 @@ export class ImagesService {
           throw new InternalServerErrorException(`Failed to delete file: ${img.originalFilename}`);
         }
       }
-
-      await tx.image.deleteMany({
-        where: {
-          id: { in: ids }
-        },
-      });
 
       return { deleted: ids };
     });

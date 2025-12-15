@@ -72,9 +72,8 @@ let ImagesService = class ImagesService {
     }
     async uploadImages(galleryId, files) {
         return this.prisma.$transaction(async (tx) => {
-            const createdImages = [];
             const galleryFolder = await this.ensureGalleryFolder(galleryId);
-            for (const file of files) {
+            const uploadPromises = files.map(async (file) => {
                 const fileGuid = (0, crypto_1.randomUUID)();
                 const relativePath = path.join(galleryId, `${fileGuid}_${file.originalname}`);
                 let image;
@@ -97,8 +96,9 @@ let ImagesService = class ImagesService {
                 catch (err) {
                     throw new common_1.InternalServerErrorException(`Failed to save file: ${file.originalname} to disk`);
                 }
-                createdImages.push(image);
-            }
+                return image;
+            });
+            const createdImages = await Promise.all(uploadPromises);
             return createdImages;
         });
     }
@@ -113,6 +113,11 @@ let ImagesService = class ImagesService {
             if (images.length !== ids.length) {
                 throw new common_1.ForbiddenException('Some images do not belong to this gallery');
             }
+            await tx.image.deleteMany({
+                where: {
+                    id: { in: ids }
+                },
+            });
             for (const img of images) {
                 const fullPath = path.join(this.UPLOAD_ROOT, img.path);
                 try {
@@ -122,11 +127,6 @@ let ImagesService = class ImagesService {
                     throw new common_1.InternalServerErrorException(`Failed to delete file: ${img.originalFilename}`);
                 }
             }
-            await tx.image.deleteMany({
-                where: {
-                    id: { in: ids }
-                },
-            });
             return { deleted: ids };
         });
     }

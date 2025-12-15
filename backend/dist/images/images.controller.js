@@ -18,13 +18,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImagesController = void 0;
 const common_1 = require("@nestjs/common");
 const images_service_1 = require("./images.service");
-const delete_images_dto_1 = require("./dto/delete-images.dto");
-const move_images_dto_1 = require("./dto/move-images.dto");
 const auth_decorator_1 = require("../auth/decorators/auth.decorator");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
 const path_1 = __importDefault(require("path"));
-const extention_file_1 = require("./dto/extention.file");
+const extention_file_1 = require("./extention.file");
+const ids_images_dto_1 = require("./dto/ids-images.dto");
 let ImagesController = class ImagesController {
     imagesService;
     constructor(imagesService) {
@@ -35,7 +34,7 @@ let ImagesController = class ImagesController {
             throw new common_1.BadRequestException('No files provided');
         return this.imagesService.uploadImages(galleryId, files);
     }
-    async getByGallery(galleryId, page = 1, limit = 20) {
+    async getByGallery(galleryId, page, limit) {
         return this.imagesService.getImagesByGallery(galleryId, page, limit);
     }
     async deleteImages(body, galleryId) {
@@ -61,14 +60,22 @@ let ImagesController = class ImagesController {
 exports.ImagesController = ImagesController;
 __decorate([
     (0, common_1.Post)('/upload'),
+    (0, auth_decorator_1.Authorization)('ADMIN', 'OWNER'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('images', 20, {
         storage: (0, multer_1.memoryStorage)(),
         fileFilter: (req, file, cb) => {
             const ext = path_1.default.extname(file.originalname).toLowerCase();
+            const mime = file.mimetype;
             if (!extention_file_1.ALLOWED_EXTENSIONS.includes(ext)) {
                 return cb(new common_1.BadRequestException('Only image files are allowed'), false);
             }
+            if (!extention_file_1.ALLOWED_MIME_TYPES.includes(mime)) {
+                return cb(new common_1.BadRequestException('Only image files are allowed (invalid MIME type)'), false);
+            }
             cb(null, true);
+        },
+        limits: {
+            fileSize: 15 * 1024 * 1024,
         },
     })),
     __param(0, (0, common_1.Param)('galleryId')),
@@ -81,8 +88,8 @@ __decorate([
     (0, auth_decorator_1.Authorization)('ADMIN', 'OWNER', 'REGULAR'),
     (0, common_1.Get)(''),
     __param(0, (0, common_1.Param)('galleryId')),
-    __param(1, (0, common_1.Query)('page')),
-    __param(2, (0, common_1.Query)('limit')),
+    __param(1, (0, common_1.Query)('page', common_1.ParseIntPipe)),
+    __param(2, (0, common_1.Query)('limit', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Number, Number]),
     __metadata("design:returntype", Promise)
@@ -93,7 +100,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Param)('galleryId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [delete_images_dto_1.DeleteImagesDto, String]),
+    __metadata("design:paramtypes", [ids_images_dto_1.IdsImagesDto, String]),
     __metadata("design:returntype", Promise)
 ], ImagesController.prototype, "deleteImages", null);
 __decorate([
@@ -103,7 +110,7 @@ __decorate([
     __param(1, (0, common_1.Param)('targetGalleryId')),
     __param(2, (0, common_1.Param)('galleryId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [move_images_dto_1.MoveImagesDto, String, String]),
+    __metadata("design:paramtypes", [ids_images_dto_1.IdsImagesDto, String, String]),
     __metadata("design:returntype", Promise)
 ], ImagesController.prototype, "moveImages", null);
 __decorate([
@@ -113,7 +120,7 @@ __decorate([
     __param(1, (0, common_1.Param)('targetGalleryId')),
     __param(2, (0, common_1.Param)('galleryId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [move_images_dto_1.MoveImagesDto, String, String]),
+    __metadata("design:paramtypes", [ids_images_dto_1.IdsImagesDto, String, String]),
     __metadata("design:returntype", Promise)
 ], ImagesController.prototype, "copyImages", null);
 exports.ImagesController = ImagesController = __decorate([
