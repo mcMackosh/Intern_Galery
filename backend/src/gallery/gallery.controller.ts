@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Put, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Put, Delete, Query, ValidationPipe } from '@nestjs/common';
 import { GalleryService } from './gallery.service';
 import { CreateGalleryDto } from './dto/create-gallery.dto';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { Authorized } from 'src/auth/decorators/authorized.decorator';
 import { UpdateGalleryDto } from './dto/update-gallery.dto';
 import { Authorization } from 'src/auth/decorators/auth.decorator';
+import { GetGalleriesQueryDto } from './dto/gallery.search.options';
 
 @Controller('gallery')
 export class GalleryController {
@@ -36,8 +37,9 @@ export class GalleryController {
     @Authorized('userId') userId: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 3,
+    @Query(new ValidationPipe({ transform: true })) options: GetGalleriesQueryDto,
   ) {
-    const galeries = await this.galleryService.getAllGalleries(userId, page, limit);
+    const galeries = await this.galleryService.getAllGalleries(userId, page, limit, options);
     return galeries;
   }
 

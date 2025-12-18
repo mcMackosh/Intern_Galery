@@ -7,10 +7,11 @@ import {
 import { CreateGalleryDto } from './dto/create-gallery.dto';
 import { UpdateGalleryDto } from './dto/update-gallery.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserRole } from 'prisma/__generated__';
+import { Prisma, UserRole } from 'prisma/__generated__';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
+import { GetGalleriesQueryDto } from './dto/gallery.search.options';
 const mkdir = promisify(fs.mkdir);
 const unlink = promisify(fs.unlink);
 const copyFile = promisify(fs.copyFile);
@@ -37,52 +38,84 @@ export class GalleryService {
     }
   }
 
-  async getAllGalleries(userId: string, page: number, limit: number) {
+  async getAllGalleries(
+    userId: string, page: number,
+    limit: number, query: GetGalleriesQueryDto,
+  ) {
     try {
+      const {
+        search, 
+        sortBy = 'createdAt', sortOrder = 'desc',
+        startDate, endDate,
+        minImages, maxImages,
+      } = query;
+
       const skip = (page - 1) * limit;
 
-      const galleries = await this.prisma.gallery.findMany({
-        where: {
-          memberships: {
-            some: { userId },
-          },
+      const where: Prisma.GalleryWhereInput = {
+        memberships: {
+          some: { userId },
         },
+      };
+
+      if (search) {
+        where.title = {
+          contains: search,
+          mode: 'insensitive',
+        };
+      }
+
+      if (startDate || endDate) {
+        where.createdAt = {};
+        if (startDate) where.createdAt.gte = new Date(startDate);
+        if (endDate) where.createdAt.lte = new Date(endDate);
+      }
+
+      const galleries = await this.prisma.gallery.findMany({
+        where,
         include: {
           memberships: {
             where: { userId },
             select: { role: true },
           },
-        },
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      });
-
-      const totalCount = await this.prisma.gallery.count({
-        where: {
-          memberships: {
-            some: { userId },
+          _count: {
+            select: { images: true },
           },
         },
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
       });
 
-      const formattedGalleries = galleries.map(gallery => {
+      const filteredGalleries = galleries.filter(gallery => {
+        const count = gallery._count.images;
+
+        if (minImages !== undefined && count < minImages) return false;
+        if (maxImages !== undefined && count > maxImages) return false;
+
+        return true;
+      });
+
+      const paginatedGalleries = filteredGalleries.slice(skip, skip + limit);
+
+      const formattedGalleries = paginatedGalleries.map(gallery => {
         const role = gallery.memberships[0]?.role || null;
-        const { memberships, ...galleryWithoutMemberships } = gallery;
+        const { memberships, _count, ...rest } = gallery;
 
         return {
-          ...galleryWithoutMemberships,
+          ...rest,
           role,
+          imagesCount: _count.images,
         };
       });
 
       return {
         data: formattedGalleries,
         meta: {
-          total: totalCount,
+          total: filteredGalleries.length,
           page,
           limit,
-          totalPages: Math.ceil(totalCount / limit),
+          totalPages: Math.ceil(filteredGalleries.length / limit),
         },
       };
     } catch (err) {
@@ -132,32 +165,32 @@ export class GalleryService {
   }
 
   async deleteGallery(galleryId: string) {
-  const galleryFolder = path.join(process.cwd(), 'uploads', galleryId);
+    const galleryFolder = path.join(process.cwd(), 'uploads', galleryId);
 
-  try {
-    await this.prisma.$transaction(async (tx) => {
+    try {
+      await this.prisma.$transaction(async (tx) => {
 
-      await tx.gallery.delete({
-        where: { id: galleryId },
-      });
+        await tx.gallery.delete({
+          where: { id: galleryId },
+        });
 
-      try {
-        if (fs.existsSync(galleryFolder)) {
-          await fs.promises.rm(galleryFolder, {
-            recursive: true,
-            force: true,
-          });
+        try {
+          if (fs.existsSync(galleryFolder)) {
+            await fs.promises.rm(galleryFolder, {
+              recursive: true,
+              force: true,
+            });
+          }
+        } catch (err) {
+          throw new InternalServerErrorException(
+            'Failed to delete gallery folder from disk',
+          );
         }
-      } catch (err) {
-        throw new InternalServerErrorException(
-          'Failed to delete gallery folder from disk',
-        );
-      }
-    });
-  } catch (err) {
-    throw new InternalServerErrorException('Failed to delete gallery');
-  }
+      });
+    } catch (err) {
+      throw new InternalServerErrorException('Failed to delete gallery');
+    }
 
-  return { message: 'Gallery deleted successfully' };
-}
+    return { message: 'Gallery deleted successfully' };
+  }
 }

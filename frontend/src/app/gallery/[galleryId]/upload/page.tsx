@@ -1,16 +1,18 @@
-
-
 import UploadImagesPage from "@/feature/image/components/upload/UploadImagesPage";
+import { RoleGuard } from "@/shared/RolesGuard";
+import { UserRole } from "@/types/membership";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: 'Upload Gallery',
+  title: "Upload Gallery",
 };
 
-export default function GalleryPage() {
+const GalleryPage = () => {
   return (
-    <div>
-     <UploadImagesPage/>
-    </div>
-  )
-}
+    <RoleGuard roles={[UserRole.ADMIN, UserRole.OWNER]}>
+      <UploadImagesPage />
+    </RoleGuard>
+  );
+};
+
+export default GalleryPage;

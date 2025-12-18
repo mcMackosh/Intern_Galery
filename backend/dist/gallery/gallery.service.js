@@ -76,47 +76,68 @@ let GalleryService = class GalleryService {
             throw new common_1.InternalServerErrorException('Failed to create gallery');
         }
     }
-    async getAllGalleries(userId, page, limit) {
+    async getAllGalleries(userId, page, limit, query) {
         try {
+            const { search, sortBy = 'createdAt', sortOrder = 'desc', startDate, endDate, minImages, maxImages, } = query;
             const skip = (page - 1) * limit;
-            const galleries = await this.prisma.gallery.findMany({
-                where: {
-                    memberships: {
-                        some: { userId },
-                    },
+            const where = {
+                memberships: {
+                    some: { userId },
                 },
+            };
+            if (search) {
+                where.title = {
+                    contains: search,
+                    mode: 'insensitive',
+                };
+            }
+            if (startDate || endDate) {
+                where.createdAt = {};
+                if (startDate)
+                    where.createdAt.gte = new Date(startDate);
+                if (endDate)
+                    where.createdAt.lte = new Date(endDate);
+            }
+            const galleries = await this.prisma.gallery.findMany({
+                where,
                 include: {
                     memberships: {
                         where: { userId },
                         select: { role: true },
                     },
-                },
-                skip,
-                take: limit,
-                orderBy: { createdAt: 'desc' },
-            });
-            const totalCount = await this.prisma.gallery.count({
-                where: {
-                    memberships: {
-                        some: { userId },
+                    _count: {
+                        select: { images: true },
                     },
                 },
+                orderBy: {
+                    [sortBy]: sortOrder,
+                },
             });
-            const formattedGalleries = galleries.map(gallery => {
+            const filteredGalleries = galleries.filter(gallery => {
+                const count = gallery._count.images;
+                if (minImages !== undefined && count < minImages)
+                    return false;
+                if (maxImages !== undefined && count > maxImages)
+                    return false;
+                return true;
+            });
+            const paginatedGalleries = filteredGalleries.slice(skip, skip + limit);
+            const formattedGalleries = paginatedGalleries.map(gallery => {
                 const role = gallery.memberships[0]?.role || null;
-                const { memberships, ...galleryWithoutMemberships } = gallery;
+                const { memberships, _count, ...rest } = gallery;
                 return {
-                    ...galleryWithoutMemberships,
+                    ...rest,
                     role,
+                    imagesCount: _count.images,
                 };
             });
             return {
                 data: formattedGalleries,
                 meta: {
-                    total: totalCount,
+                    total: filteredGalleries.length,
                     page,
                     limit,
-                    totalPages: Math.ceil(totalCount / limit),
+                    totalPages: Math.ceil(filteredGalleries.length / limit),
                 },
             };
         }

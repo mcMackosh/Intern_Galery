@@ -9,7 +9,7 @@ import { UploadDropzone } from './UploadDropzone';
 import { useUploadImages } from '../../hooks/useUploadImages';
 
 
-const UploadImagesPage: React.FC = () => {
+const UploadImagesSection: React.FC = () => {
     const router = useRouter();
     const params = useParams();
     const galleryId = params.galleryId as string;
@@ -40,4 +40,4 @@ const UploadImagesPage: React.FC = () => {
 };
 
 
-export default UploadImagesPage;
+export default UploadImagesSection;

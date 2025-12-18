@@ -16,3 +16,12 @@ export interface IGalleryListResponse {
     totalPages: number;
   };
 }
+
+export interface GalleryFilters {
+  search?: string;
+  sortBy?: 'title' | 'createdAt';
+  startDate?: Date | null;
+  endDate?: Date | null;
+  minImages?: number;
+  maxImages?: number;
+}

@@ -1,13 +1,22 @@
 import { TypeCreateGalleryScheme, TypeUpdateGalleryScheme } from "@/feature/gallery/schemes/gallery.shemes";
 import api from "@/shared/lib/api/api-interceptor";
-import { IGallery, IGalleryListResponse } from "@/types/gallery";
+import { GalleryFilters, IGallery, IGalleryListResponse } from "@/types/gallery";
 import { CONFIG } from "./config";
 
+
+
 class GalleryService {
-  public async getAllGalleries(page = 1, signal?: AbortSignal): Promise<IGalleryListResponse> {
-    const {data} = await api.get<IGalleryListResponse>("/gallery", {
-      params: { page, limit: CONFIG.limit_item_queary }, signal
-    });
+  public async getAllGalleries(
+    page = 1,
+    signal?: AbortSignal,
+    queryString?: string
+  ): Promise<IGalleryListResponse> {
+    const url = queryString
+      ? `/gallery?page=${page}&limit=${CONFIG.limit_item_queary}&${queryString}`
+      : `/gallery?page=${page}&limit=${CONFIG.limit_item_queary}`;
+
+    const { data } = await api.get<IGalleryListResponse>(url, { signal });
+
     return data;
   }
 

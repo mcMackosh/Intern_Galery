@@ -19,6 +19,7 @@ const create_gallery_dto_1 = require("./dto/create-gallery.dto");
 const authorized_decorator_1 = require("../auth/decorators/authorized.decorator");
 const update_gallery_dto_1 = require("./dto/update-gallery.dto");
 const auth_decorator_1 = require("../auth/decorators/auth.decorator");
+const gallery_search_options_1 = require("./dto/gallery.search.options");
 let GalleryController = class GalleryController {
     galleryService;
     constructor(galleryService) {
@@ -32,8 +33,8 @@ let GalleryController = class GalleryController {
         const gallery = await this.galleryService.createGallery(dto, userId);
         return gallery;
     }
-    async getAllGaleries(userId, page = 1, limit = 3) {
-        const galeries = await this.galleryService.getAllGalleries(userId, page, limit);
+    async getAllGaleries(userId, page = 1, limit = 3, options) {
+        const galeries = await this.galleryService.getAllGalleries(userId, page, limit, options);
         return galeries;
     }
     async updateGallery(galleryId, dto) {
@@ -70,8 +71,9 @@ __decorate([
     __param(0, (0, authorized_decorator_1.Authorized)('userId')),
     __param(1, (0, common_1.Query)('page')),
     __param(2, (0, common_1.Query)('limit')),
+    __param(3, (0, common_1.Query)(new common_1.ValidationPipe({ transform: true }))),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:paramtypes", [String, Number, Number, gallery_search_options_1.GetGalleriesQueryDto]),
     __metadata("design:returntype", Promise)
 ], GalleryController.prototype, "getAllGaleries", null);
 __decorate([

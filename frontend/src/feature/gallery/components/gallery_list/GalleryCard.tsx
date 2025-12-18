@@ -27,17 +27,17 @@ export default function GalleryCard({ gallery }: Props) {
         className="relative bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
         onClick={() => router.push(`/gallery/${gallery.id}`)}
       >
-        <div className="absolute top-3 right-3 flex items-center gap-2 z-10">
+        <div className="absolute top-3 right-3 flex items-center gap-2">
           {(gallery.role === UserRole.ADMIN || gallery.role === UserRole.OWNER) && (
             <>
               <button
-                className="p-2 bg-white rounded-full shadow hover:bg-gray-100 transition"
+                className="p-2 z-1 bg-white rounded-full shadow hover:bg-gray-100 transition"
                 onClick={(e) => { e.stopPropagation(); setIsEditOpen(true); }}
               >
                 <Edit className="w-4 h-4 text-blue-600" />
               </button>
               {gallery.role === UserRole.OWNER ? <button
-                className="p-2 bg-white rounded-full shadow hover:bg-gray-100 transition"
+                className="p-2 z-1 bg-white rounded-full shadow hover:bg-gray-100 transition"
                 onClick={(e) => { e.stopPropagation(); setIsDeleteOpen(true); }}
               >
                 <Trash2 className="w-4 h-4 text-red-600" />
@@ -45,7 +45,7 @@ export default function GalleryCard({ gallery }: Props) {
               
             </>
           )}
-          <span className="inline-block px-4 py-1 text-sm font-medium rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md">
+          <span className="inline-block z-1 px-4 py-1 text-sm font-medium rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md">
             {gallery?.role || 'USER'}
           </span>
         </div>

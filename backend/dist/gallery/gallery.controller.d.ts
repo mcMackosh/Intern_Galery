@@ -1,6 +1,7 @@
 import { GalleryService } from './gallery.service';
 import { CreateGalleryDto } from './dto/create-gallery.dto';
 import { UpdateGalleryDto } from './dto/update-gallery.dto';
+import { GetGalleriesQueryDto } from './dto/gallery.search.options';
 export declare class GalleryController {
     private readonly galleryService;
     constructor(galleryService: GalleryService);
@@ -19,9 +20,10 @@ export declare class GalleryController {
         description: string | null;
         title: string;
     }>;
-    getAllGaleries(userId: string, page?: number, limit?: number): Promise<{
+    getAllGaleries(userId: string, page: number | undefined, limit: number | undefined, options: GetGalleriesQueryDto): Promise<{
         data: {
             role: import("prisma/__generated__").$Enums.UserRole;
+            imagesCount: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;

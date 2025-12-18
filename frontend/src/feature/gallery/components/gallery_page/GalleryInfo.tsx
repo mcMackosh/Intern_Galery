@@ -9,6 +9,7 @@ import { useDeleteGallery } from '../../hooks/useDeleteGallery'
 import MembershipForm from '@/feature/membership/components/MembershipForm'
 import { UserRole } from '@/types/membership'
 import Button from '@/shared/ui/Buton'
+import Link from 'next/link'
 
 export function GalleryInfo() {
   const { gallery, isLoading: galleryLoading } = useOneGallery()
@@ -28,6 +29,9 @@ export function GalleryInfo() {
     )
   }
 
+  const isAdminOrOwner =
+    gallery?.role === UserRole.ADMIN || gallery?.role === UserRole.OWNER
+
   return (
     <div className="space-y-6 bg-white p-6 md:p-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -45,9 +49,9 @@ export function GalleryInfo() {
         </p>
       )}
 
-      <div className="flex flex-row flex-wrap justify-end items-center gap-3 mt-4">
-        {(gallery?.role === UserRole.ADMIN || gallery?.role === UserRole.OWNER) && (
-          <>
+      {isAdminOrOwner && (
+        <div className="flex flex-wrap justify-between items-center gap-3 mt-4">
+          <div className="flex flex-wrap items-center gap-3">
             <Button
               onClick={() => setIsEditOpen(true)}
               className="inline-flex items-center gap-2 px-5 py-2"
@@ -55,56 +59,80 @@ export function GalleryInfo() {
               <Pencil className="w-5 h-5" /> Edit Gallery
             </Button>
 
-            <BaseModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} className="w-full max-w-lg p-6 md:p-8 bg-white rounded-2xl shadow-xl">
-              <h2 className="text-xl md:text-2xl font-semibold mb-6">Edit Gallery</h2>
-              <UpdateGalleryForm onSuccess={() => setIsEditOpen(false)} />
-            </BaseModal>
-
             <Button
               onClick={() => setIsMembershipOpen(true)}
-              className="inline-flex items-center gap-2 px-5"
+              className="inline-flex items-center gap-2 px-5 py-2"
             >
               <Pencil className="w-5 h-5" /> Membership Settings
             </Button>
-
-            <BaseModal isOpen={isMembershipOpen} onClose={() => setIsMembershipOpen(false)} className="w-[95vw] max-w-5xl p-6 md:p-8 bg-white rounded-2xl shadow-xl">
-              <h2 className="text-xl md:text-2xl font-semibold mb-6">Membership Settings</h2>
-              <MembershipForm />
-            </BaseModal>
 
             <Button
               onClick={() => setIsConfirmOpen(true)}
               variant="danger"
               className="inline-flex items-center gap-2 px-5 py-2"
             >
-              <Delete className="w-4 h-4" /> Delete
+              <Delete className="w-4 h-4" /> Delete Gallery
             </Button>
+          </div>
 
-            <BaseModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)} className="w-[90vw] max-w-md p-6 bg-white rounded-2xl shadow-xl">
-              <h2 className="text-xl font-semibold mb-4">Confirm Delete</h2>
-              <p className="text-gray-700 mb-6">
-                Are you sure you want to delete this gallery? This action cannot be undone.
-              </p>
-              <div className="flex justify-end gap-3">
-                <Button onClick={() => setIsConfirmOpen(false)} className="w-auto px-4 py-2">
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    deleteGallery()
-                    setIsConfirmOpen(false)
-                  }}
-                  variant="danger"
-                  className="w-auto px-4 py-2"
-                >
-                  Yes, delete
-                </Button>
-              </div>
-            </BaseModal>
-          </>
-        )}
-      </div>
-     
+          <Link
+            href={`/gallery/${gallery?.id}/upload`}
+            className="text-blue-600 underline hover:text-blue-800 focus:text-blue-800 focus:outline-none transition-colors"
+          >
+            Upload images
+          </Link>
+        </div>
+      )}
+
+      <BaseModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        className="w-full max-w-lg p-6 md:p-8 bg-white rounded-2xl shadow-xl"
+      >
+        <h2 className="text-xl md:text-2xl font-semibold mb-6">Edit Gallery</h2>
+        <UpdateGalleryForm onSuccess={() => setIsEditOpen(false)} />
+      </BaseModal>
+
+      <BaseModal
+        isOpen={isMembershipOpen}
+        onClose={() => setIsMembershipOpen(false)}
+        className="w-[95vw] max-w-5xl p-6 md:p-8 bg-white rounded-2xl shadow-xl"
+      >
+        <h2 className="text-xl md:text-2xl font-semibold mb-6">
+          Membership Settings
+        </h2>
+        <MembershipForm />
+      </BaseModal>
+
+      <BaseModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        className="w-[90vw] max-w-md p-6 bg-white rounded-2xl shadow-xl"
+      >
+        <h2 className="text-xl font-semibold mb-4">Confirm Delete</h2>
+        <p className="text-gray-700 mb-6">
+          Are you sure you want to delete this gallery? This action cannot be
+          undone.
+        </p>
+        <div className="flex justify-end gap-3">
+          <Button
+            onClick={() => setIsConfirmOpen(false)}
+            className="w-auto px-4 py-2"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              deleteGallery()
+              setIsConfirmOpen(false)
+            }}
+            variant="danger"
+            className="w-auto px-4 py-2"
+          >
+            Yes, delete
+          </Button>
+        </div>
+      </BaseModal>
     </div>
   )
 }

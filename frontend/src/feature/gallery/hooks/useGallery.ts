@@ -1,17 +1,22 @@
 import { useQuery, UseQueryOptions, keepPreviousData } from '@tanstack/react-query';
 import { galleryService } from '../../../servises/gallery.service';
-import { IGalleryListResponse } from '@/types/gallery';
+import { GalleryFilters, IGalleryListResponse } from '@/types/gallery';
+import { useSearchParams } from 'next/navigation';
 
 
 export const useGalleries = (page: number) => {
-  const options: UseQueryOptions<IGalleryListResponse, Error> = {
-    queryKey: ['galleries', page],
-    queryFn: ({ signal }) => galleryService.getAllGalleries(page, signal),
-    placeholderData: keepPreviousData,
-    staleTime: 5000
-  };
+  const searchParams = useSearchParams();
+  const queryString = searchParams?.toString() ?? '';
 
-  const query = useQuery(options);
+  const queryKey = ['galleries', page, queryString];
+
+  const query = useQuery<IGalleryListResponse, Error>({
+    queryKey,
+    queryFn: ({ signal }) =>
+      galleryService.getAllGalleries(page, signal, queryString),
+    placeholderData: keepPreviousData,
+    staleTime: 5000,
+  });
 
   return {
     data: query.data?.data,
