@@ -99,29 +99,42 @@ export class ImagesService {
     });
   }
 
-
-  async getImagesByGallery(galleryId: string, page = 1, limit = 20) {
+  async getImagesByGallery(
+    galleryId: string,
+    page = 1,
+    limit = 20,
+    order: 'asc' | 'desc' = 'desc'
+  ) {
     try {
       const skip = (page - 1) * limit;
+
       const [items, total] = await Promise.all([
         this.prisma.image.findMany({
           where: { galleryId },
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: order },
           skip,
           take: limit,
         }),
         this.prisma.image.count({ where: { galleryId } }),
       ]);
 
+      const grouped = items.reduce((acc, item) => {
+        const dateKey = item.createdAt.toISOString().split('T')[0];
+        if (!acc[dateKey]) acc[dateKey] = [];
+        acc[dateKey].push(item);
+        return acc;
+      }, {} as Record<string, typeof items[number][]>);
+
       return {
-        items,
+        items: grouped,
         page,
         limit,
         total,
         totalPages: Math.ceil(total / limit),
       };
     } catch (error) {
-      throw new InternalServerErrorException('Problem with get image');
+      console.error(error);
+      throw new InternalServerErrorException('Problem with get images');
     }
   }
 

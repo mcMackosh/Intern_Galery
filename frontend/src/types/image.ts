@@ -7,7 +7,7 @@ export interface Image {
 }
 
 export interface GetImagesResponse {
-  items: Image[];
+  items: Record<string, Image[]>;
   page: number;
   limit: number;
   total: number;

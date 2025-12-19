@@ -14,10 +14,11 @@ class ImagesService {
   async getImagesByGallery(
     galleryId: string,
     page = 1,
-    limit = 20
+    limit = 20,
+    order: 'asc' | 'desc'
   ): Promise<GetImagesResponse> {
     const { data } = await api.get<GetImagesResponse>(
-      `galleries/${galleryId}/image?page=${page}&limit=${limit}`
+      `galleries/${galleryId}/image?page=${page}&limit=${limit}&order=${order}`
     );
     return data;
   }

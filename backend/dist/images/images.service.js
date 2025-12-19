@@ -130,20 +130,27 @@ let ImagesService = class ImagesService {
             return { deleted: ids };
         });
     }
-    async getImagesByGallery(galleryId, page = 1, limit = 20) {
+    async getImagesByGallery(galleryId, page = 1, limit = 20, order = 'desc') {
         try {
             const skip = (page - 1) * limit;
             const [items, total] = await Promise.all([
                 this.prisma.image.findMany({
                     where: { galleryId },
-                    orderBy: { createdAt: 'desc' },
+                    orderBy: { createdAt: order },
                     skip,
                     take: limit,
                 }),
                 this.prisma.image.count({ where: { galleryId } }),
             ]);
+            const grouped = items.reduce((acc, item) => {
+                const dateKey = item.createdAt.toISOString().split('T')[0];
+                if (!acc[dateKey])
+                    acc[dateKey] = [];
+                acc[dateKey].push(item);
+                return acc;
+            }, {});
             return {
-                items,
+                items: grouped,
                 page,
                 limit,
                 total,
@@ -151,7 +158,8 @@ let ImagesService = class ImagesService {
             };
         }
         catch (error) {
-            throw new common_1.InternalServerErrorException('Problem with get image');
+            console.error(error);
+            throw new common_1.InternalServerErrorException('Problem with get images');
         }
     }
     async moveImages(ids, targetGalleryId, galleryId) {

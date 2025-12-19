@@ -14,14 +14,14 @@ export declare class ImagesService {
     deleteImages(ids: string[], galleryId: string): Promise<{
         deleted: string[];
     }>;
-    getImagesByGallery(galleryId: string, page?: number, limit?: number): Promise<{
-        items: {
+    getImagesByGallery(galleryId: string, page?: number, limit?: number, order?: 'asc' | 'desc'): Promise<{
+        items: Record<string, {
             id: string;
             createdAt: Date;
             path: string;
             galleryId: string;
             originalFilename: string;
-        }[];
+        }[]>;
         page: number;
         limit: number;
         total: number;

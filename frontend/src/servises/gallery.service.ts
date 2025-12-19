@@ -3,8 +3,6 @@ import api from "@/shared/lib/api/api-interceptor";
 import { GalleryFilters, IGallery, IGalleryListResponse } from "@/types/gallery";
 import { CONFIG } from "./config";
 
-
-
 class GalleryService {
   public async getAllGalleries(
     page = 1,

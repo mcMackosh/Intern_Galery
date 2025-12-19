@@ -10,14 +10,14 @@ export declare class ImagesController {
         galleryId: string;
         originalFilename: string;
     }[]>;
-    getByGallery(galleryId: string, page: number, limit: number): Promise<{
-        items: {
+    getByGallery(galleryId: string, page: number, limit: number, order: 'asc' | 'desc'): Promise<{
+        items: Record<string, {
             id: string;
             createdAt: Date;
             path: string;
             galleryId: string;
             originalFilename: string;
-        }[];
+        }[]>;
         page: number;
         limit: number;
         total: number;

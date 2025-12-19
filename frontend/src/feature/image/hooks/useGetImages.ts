@@ -2,29 +2,33 @@ import { SERVER_URL } from '@/env';
 import { imageService } from '@/servises/image.service';
 import { GetImagesResponse, Image } from '@/types/image';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 
-export const useGetImagesInfinite = (limit = 20) => {
+export const useGetImagesInfinite = (limit = 20, sort: 'dateAsc' | 'dateDesc' = 'dateDesc') => {
   const params = useParams();
   const galleryId = params?.galleryId as string | undefined;
+  const order = sort === 'dateAsc' ? 'asc' : 'desc';
 
   return useInfiniteQuery<GetImagesResponse, Error>({
-    queryKey: ['images', galleryId],
+    queryKey: ['images', galleryId, order],
     queryFn: async ({ pageParam = 1 }) => {
       if (!galleryId) throw new Error('Gallery ID is missing');
-      const data = await imageService.getImagesByGallery(galleryId, pageParam as number, limit);
-  
 
-      const items: Image[] = data.items.map(img => ({
-        ...img,
-        path: `${SERVER_URL}/uploads/${img.path}`,
-      }));
+      const data = await imageService.getImagesByGallery(galleryId, pageParam as number, limit, order);
 
-      return { ...data, items };
+      const groupedWithFullPath: Record<string, Image[]> = {};
+      Object.entries(data.items).forEach(([date, images]) => {
+        groupedWithFullPath[date] = images.map(img => ({
+          ...img,
+          path: `${SERVER_URL}/uploads/${img.path}`,
+        }));
+      });
+
+      return { ...data, items: groupedWithFullPath };
     },
-    getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.items.length < limit) return undefined;
-      return allPages.length + 1;
+    getNextPageParam: (lastPage) => {
+      if (lastPage.page >= lastPage.totalPages) return undefined;
+      return lastPage.page + 1;
     },
     initialPageParam: 1,
     enabled: !!galleryId,

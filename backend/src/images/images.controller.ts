@@ -61,9 +61,10 @@ export class ImagesController {
     @Param('galleryId') galleryId: string,
     @Query('page', ParseIntPipe) page: number,
     @Query('limit', ParseIntPipe) limit: number,
+    @Query('order') order: 'asc' | 'desc'
   ) {
 
-    return this.imagesService.getImagesByGallery(galleryId, page, limit);
+    return this.imagesService.getImagesByGallery(galleryId, page, limit, order);
   }
 
   @Authorization('ADMIN', 'OWNER')

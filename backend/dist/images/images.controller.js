@@ -34,8 +34,8 @@ let ImagesController = class ImagesController {
             throw new common_1.BadRequestException('No files provided');
         return this.imagesService.uploadImages(galleryId, files);
     }
-    async getByGallery(galleryId, page, limit) {
-        return this.imagesService.getImagesByGallery(galleryId, page, limit);
+    async getByGallery(galleryId, page, limit, order) {
+        return this.imagesService.getImagesByGallery(galleryId, page, limit, order);
     }
     async deleteImages(body, galleryId) {
         if (!body?.ids || !Array.isArray(body.ids)) {
@@ -90,8 +90,9 @@ __decorate([
     __param(0, (0, common_1.Param)('galleryId')),
     __param(1, (0, common_1.Query)('page', common_1.ParseIntPipe)),
     __param(2, (0, common_1.Query)('limit', common_1.ParseIntPipe)),
+    __param(3, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:paramtypes", [String, Number, Number, String]),
     __metadata("design:returntype", Promise)
 ], ImagesController.prototype, "getByGallery", null);
 __decorate([
