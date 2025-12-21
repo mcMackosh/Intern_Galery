@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { UserRole } from '@/types/membership'
 import { useAddUser } from '@/feature/membership/hooks/useAddUser'
 import Button from '@/shared/ui/Buton'
+import { Input } from '@/shared/ui/Input'
 
 interface AddUserFormData {
   userId: string
@@ -30,7 +31,8 @@ export function AddMemberForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
       <label className="text-sm font-medium text-gray-700">Add new user</label>
-      <input
+      <Input
+        id='userId'
         type="text"
         {...register('userId', { required: true })}
         placeholder="Enter user ID..."

@@ -1,13 +1,14 @@
 import { PrismaService } from '../prisma/prisma.service';
 export declare class ImagesService {
     private readonly prisma;
-    private UPLOAD_ROOT;
+    private readonly UPLOAD_ROOT;
     constructor(prisma: PrismaService);
     private ensureGalleryFolder;
+    private toImageUrl;
     uploadImages(galleryId: string, files: Express.Multer.File[]): Promise<{
+        path: string;
         id: string;
         createdAt: Date;
-        path: string;
         galleryId: string;
         originalFilename: string;
     }[]>;
@@ -16,9 +17,9 @@ export declare class ImagesService {
     }>;
     getImagesByGallery(galleryId: string, page?: number, limit?: number, order?: 'asc' | 'desc'): Promise<{
         items: Record<string, {
+            path: string;
             id: string;
             createdAt: Date;
-            path: string;
             galleryId: string;
             originalFilename: string;
         }[]>;
@@ -28,16 +29,16 @@ export declare class ImagesService {
         totalPages: number;
     }>;
     moveImages(ids: string[], targetGalleryId: string, galleryId: string): Promise<{
+        path: string;
         id: string;
         createdAt: Date;
-        path: string;
         galleryId: string;
         originalFilename: string;
     }[]>;
     copyImages(ids: string[], targetGalleryId: string, galleryId: string): Promise<{
+        path: string;
         id: string;
         createdAt: Date;
-        path: string;
         galleryId: string;
         originalFilename: string;
     }[]>;

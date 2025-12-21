@@ -15,7 +15,7 @@ const class_transformer_1 = require("class-transformer");
 class GetGalleriesQueryDto {
     search;
     sortBy;
-    sortOrder;
+    orderBy;
     startDate;
     endDate;
     minImages;
@@ -36,7 +36,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], GetGalleriesQueryDto.prototype, "sortOrder", void 0);
+], GetGalleriesQueryDto.prototype, "orderBy", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),

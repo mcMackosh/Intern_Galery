@@ -12,10 +12,12 @@ const app_module_1 = require("./app.module");
 const swagger_1 = require("@nestjs/swagger");
 const path_1 = require("path");
 const multer_1 = __importDefault(require("multer"));
+const AllExceptionsFilter_1 = require("./AllExceptionsFilter");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const config = app.get(config_1.ConfigService);
     app.use((0, express_1.json)({ limit: '10mb' }));
+    app.useGlobalFilters(new AllExceptionsFilter_1.GlobalExceptionFilter());
     app.use((0, cookie_parser_1.default)(config.getOrThrow('COOKIES_SECRET')));
     app.useGlobalPipes(new common_1.ValidationPipe({
         transform: true

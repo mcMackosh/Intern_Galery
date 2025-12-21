@@ -8,14 +8,17 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import multer from 'multer';
+import { GlobalExceptionFilter } from './AllExceptionsFilter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
 	const config = app.get(ConfigService)
 	
 	app.use(json({ limit: '10mb' }));
+	app.useGlobalFilters(new GlobalExceptionFilter());
 
 	app.use(cookieParser(config.getOrThrow<string>('COOKIES_SECRET')))
+	
 
 	app.useGlobalPipes(
 		new ValidationPipe({

@@ -12,7 +12,7 @@ export class GetGalleriesQueryDto {
 
   @IsOptional()
   @IsString()
-  sortOrder?: 'asc' | 'desc';
+  orderBy?: 'asc' | 'desc';
 
   @IsOptional()
   @IsDateString()

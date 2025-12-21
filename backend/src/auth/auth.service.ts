@@ -1,123 +1,117 @@
-import { ConflictException, Inject, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ProfileService } from 'src/profile/profile.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
 import { RedisService } from 'src/redis/redis.service';
-import { User } from 'prisma/__generated__';
-import { UserSafeSelectType } from 'src/profile/profile.select';
 
 @Injectable()
 export class AuthService {
+  constructor(
+    private readonly profileService: ProfileService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly redisService: RedisService,
+  ) {}
 
-	constructor(
-		private readonly profileService: ProfileService,
-		private readonly jwtService: JwtService,
-		private readonly configService: ConfigService,
-		private readonly redisService: RedisService,
-	) { }
+  async login(dto: LoginDto) {
+    const user = await this.profileService.findByEmail(dto.email);
 
+    if (!user || !user.password) {
+      throw new NotFoundException('User not found');
+    }
 
-	public async login(dto: LoginDto) {
-		const existingUser = await this.profileService.findByEmail(dto.email)
+    const isValid = await bcrypt.compare(dto.password, user.password);
 
-		if (!existingUser || !existingUser.password) {
-			throw new NotFoundException(
-				'User with this email does not exist. Please, register first or try another email.'
-			)
-		}
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
-		const isValidPassword = await bcrypt.compare(dto.password, existingUser.password)
+    const accessToken = await this.generateToken('ACCESS', user.id);
+    const refreshToken = await this.generateToken('REFRESH', user.id);
 
-		if (!isValidPassword) {
-			throw new UnauthorizedException(
-				'Password is incorrect. Please, try again or reset your password.'
-			)
-		}
+    await this.redisService.setRefreshToken(user.id, refreshToken);
 
-		const accessToken = await this.generateToken('ACCESS', existingUser.id);
-		const refreshToken = await this.generateToken('REFRESH', existingUser.id);
+    return { user, accessToken, refreshToken };
+  }
 
-		try {
-			await this.redisService.setRefreshToken(existingUser.id, refreshToken);
-		} catch {
-			throw new InternalServerErrorException('Error while saving refresh token');
-		}
+  async register(dto: RegisterDto) {
+    const user = await this.profileService.create(dto);
 
-		return { user: existingUser, accessToken, refreshToken }
-	}
+    const accessToken = await this.generateToken('ACCESS', user.id);
+    const refreshToken = await this.generateToken('REFRESH', user.id);
 
-	public async register(dto: RegisterDto) {
-		let newUser = await this.profileService.create(dto)
+    await this.redisService.setRefreshToken(user.id, refreshToken);
 
-		const accessToken = await this.generateToken('ACCESS', newUser.id)
-		const refreshToken = await this.generateToken('REFRESH', newUser.id);
+    return { user, accessToken, refreshToken };
+  }
 
-		try {
-			await this.redisService.setRefreshToken(newUser.id, refreshToken);
-		} catch {
-			throw new InternalServerErrorException('Error while saving token');
-		}
+  async refreshTokens(refreshToken: string) {
+    let payload: { userId: string };
 
-		return { user: newUser, accessToken, refreshToken }
-	}
+    try {
+      payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
 
-	async generateToken(type: 'ACCESS' | 'REFRESH', userId: string): Promise<string> {
-		const payload = { userId }
-		return this.jwtService.signAsync(payload, {
-			secret: this.configService.get('JWT_SECRET'),
-			expiresIn: type === 'ACCESS' ? '25m' : '2d',
-		});
-	}
+    const savedToken = await this.redisService.getRefreshToken(payload.userId);
 
-	async refreshTokens(token: string) {
+    if (!savedToken || savedToken !== refreshToken) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
 
-		let payload: any;
-		try {
-			payload = await this.jwtService.verifyAsync(token, {
-				secret: process.env.JWT_REFRESH_SECRET,
-			});
-		} catch {
-			throw new UnauthorizedException('Invalid refresh token');
-		}
+    const accessToken = await this.generateToken('ACCESS', payload.userId);
+    const newRefreshToken = await this.generateToken('REFRESH', payload.userId);
 
-		const saved = await this.redisService.getRefreshToken(payload.userId);
+    await this.redisService.setRefreshToken(payload.userId, newRefreshToken);
 
-		if (!saved || saved !== token) {
-			throw new InternalServerErrorException('Token mismatch');
-		}
+    const user = await this.profileService.findById(payload.userId);
 
-		const accessToken = await this.generateToken('ACCESS', payload.userId)
-		const refreshToken = await this.generateToken('REFRESH', payload.userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
 
-		try {
-			await this.redisService.setRefreshToken(payload.userId, refreshToken);
-		} catch {
-			throw new UnauthorizedException('Error while saving refresh token');
-		}
+    return { user, accessToken, refreshToken: newRefreshToken };
+  }
 
-		const newUser = await this.profileService.findById(payload.userId);
+  async logout(userId: string) {
+    const deleted = await this.redisService.removeRefreshToken(userId);
 
-		return { user: newUser, accessToken, refreshToken }
-	}
+    if (!deleted) {
+      throw new UnauthorizedException('Invalid session');
+    }
 
-	public async logout(userId: string): Promise<number> {
-		let deleted = await this.redisService.removeRefreshToken(userId)
-		if (deleted == 0) {
-			throw new UnauthorizedException('Logout error');
-		}
-		return deleted
-	}
+    return { success: true };
+  }
 
-	async logoutByToken(token: string) {
-		try {
-			await this.redisService.logoutByToken(token);
-		} catch {
-			throw new InternalServerErrorException('Error while logout');
-		}
-	}
+  async logoutByToken(refreshToken: string) {
+    await this.redisService.logoutByToken(refreshToken);
+    return { success: true };
+  }
 
+  private generateToken(
+    type: 'ACCESS' | 'REFRESH',
+    userId: string,
+  ): Promise<string> {
+    return this.jwtService.signAsync(
+      { userId },
+      {
+        secret:
+          type === 'ACCESS'
+            ? this.configService.get<string>('JWT_ACCESS_SECRET')
+            : this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: type === 'ACCESS' ? '25m' : '2d',
+      },
+    );
+  }
 }

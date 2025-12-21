@@ -44,7 +44,7 @@ export const ImageViewerModal: React.FC<Props> = ({
 
                 <div className="relative flex w-[1000px] h-[700px] items-center justify-center overflow-hidden rounded-xl bg-black/30">
                     <Image
-                        src={image.path.replace(/\\/g, '/')}
+                        src={image.path}
                         alt={image.originalFilename}
                         width={1000}
                         height={700}

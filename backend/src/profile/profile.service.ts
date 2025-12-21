@@ -51,12 +51,11 @@ export class ProfileService {
 				} as User,
 				select: userSafeSelect,
 			});
-		} catch(err) {
+		} catch (err) {
 
-			if(err.code === 'P2002' && err.meta?.target?.includes('email'))
-			{
+			if (err.code === 'P2002' && err.meta?.target?.includes('email')) {
 				throw new ConflictException(
-				'User with wthis email already exists. Please, try to login or use another email.')
+					'User with wthis email already exists. Please, try to login or use another email.')
 			}
 
 			throw new InternalServerErrorException(
@@ -73,12 +72,17 @@ export class ProfileService {
 			try {
 				existing = await this.findByEmail(dto.email);
 			} catch {
-				throw new InternalServerErrorException(
-					'Error while validating email',
-				);
+				throw new InternalServerErrorException('Error while validating email');
 			}
 
 			if (existing) throw new ConflictException('Email already in use');
+		}
+
+		let dataToUpdate = { ...dto };
+		if (dto.password) {
+			const saltRounds = 10;
+			const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
+			dataToUpdate.password = hashedPassword;
 		}
 
 		let updatedUser: UserSafeSelectType | null;
@@ -86,13 +90,11 @@ export class ProfileService {
 		try {
 			updatedUser = await this.prismaService.user.update({
 				where: { id },
-				data: dto,
+				data: dataToUpdate,
 				select: userSafeSelect,
 			});
 		} catch {
-			throw new InternalServerErrorException(
-				'Error while updating user',
-			);
+			throw new InternalServerErrorException('Error while updating user');
 		}
 
 		return updatedUser;

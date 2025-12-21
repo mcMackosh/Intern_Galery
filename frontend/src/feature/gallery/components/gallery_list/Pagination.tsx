@@ -17,8 +17,8 @@ export const PaginationComponent: React.FC<PaginationProps> = ({ totalPages }) =
 
     const handlePageClick = (event: { selected: number }) => {
         dispatch(setPage(event.selected + 1));
+        
     };
-
 
     return (
         <ReactPaginate

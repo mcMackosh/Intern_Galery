@@ -6,12 +6,10 @@ export declare class GalleryController {
     private readonly galleryService;
     constructor(galleryService: GalleryService);
     getGallery(galleryId: string, userId: string): Promise<{
-        role: import("prisma/__generated__").$Enums.UserRole;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string | null;
         title: string;
+        createdAt: Date;
+        role: import("prisma/__generated__").$Enums.UserRole;
     }>;
     createGallery(userId: string, dto: CreateGalleryDto): Promise<{
         id: string;
@@ -22,13 +20,11 @@ export declare class GalleryController {
     }>;
     getAllGaleries(userId: string, page: number | undefined, limit: number | undefined, options: GetGalleriesQueryDto): Promise<{
         data: {
+            id: string;
+            title: string;
+            createdAt: Date;
             role: import("prisma/__generated__").$Enums.UserRole;
             imagesCount: number;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string | null;
-            title: string;
         }[];
         meta: {
             total: number;

@@ -47,7 +47,6 @@ let ImagesController = class ImagesController {
         if (!body?.ids || !Array.isArray(body.ids) || !targetGalleryId) {
             throw new common_1.BadRequestException('ids array and targetGalleryId are required');
         }
-        console.log(galleryId, targetGalleryId, body);
         return this.imagesService.moveImages(body.ids, targetGalleryId, galleryId);
     }
     async copyImages(body, targetGalleryId, galleryId) {

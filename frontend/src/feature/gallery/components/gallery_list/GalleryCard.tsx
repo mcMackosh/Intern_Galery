@@ -7,6 +7,7 @@ import { BaseModal } from '@/shared/ui/Modal/BaseModal';
 import { useState } from 'react';
 import { useDeleteGallery } from '../../hooks/useDeleteGallery';
 import { UserRole } from '@/types/membership';
+import Button from '@/shared/ui/Buton';
 
 type Props = { gallery: IGallery };
 
@@ -20,6 +21,7 @@ export default function GalleryCard({ gallery }: Props) {
     deleteGallery();
     setIsDeleteOpen(false);
   }
+
 
   return (
     <>
@@ -36,7 +38,8 @@ export default function GalleryCard({ gallery }: Props) {
               >
                 <Edit className="w-4 h-4 text-blue-600" />
               </button>
-              {gallery.role === UserRole.OWNER ? <button
+              {gallery.role === UserRole.OWNER ? 
+              <button
                 className="p-2 z-1 bg-white rounded-full shadow hover:bg-gray-100 transition"
                 onClick={(e) => { e.stopPropagation(); setIsDeleteOpen(true); }}
               >
@@ -79,18 +82,19 @@ export default function GalleryCard({ gallery }: Props) {
         <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
         <p className="mb-6">Are you sure you want to delete the gallery <strong>{gallery.title}</strong>?</p>
         <div className="flex justify-end gap-3">
-          <button
+          <Button
+            variant='secondary'
             className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
             onClick={() => setIsDeleteOpen(false)}
           >
             Cancel
-          </button>
-          <button
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          </Button>
+          <Button
+            variant='danger'
             onClick={handleDelete}
           >
             Delete
-          </button>
+          </Button>
         </div>
       </BaseModal>
     </>

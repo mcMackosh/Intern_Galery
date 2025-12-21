@@ -35,8 +35,7 @@ export declare class AuthService {
         accessToken: string;
         refreshToken: string;
     }>;
-    generateToken(type: 'ACCESS' | 'REFRESH', userId: string): Promise<string>;
-    refreshTokens(token: string): Promise<{
+    refreshTokens(refreshToken: string): Promise<{
         user: {
             email: string;
             firstName: string;
@@ -48,6 +47,11 @@ export declare class AuthService {
         accessToken: string;
         refreshToken: string;
     }>;
-    logout(userId: string): Promise<number>;
-    logoutByToken(token: string): Promise<void>;
+    logout(userId: string): Promise<{
+        success: boolean;
+    }>;
+    logoutByToken(refreshToken: string): Promise<{
+        success: boolean;
+    }>;
+    private generateToken;
 }

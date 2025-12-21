@@ -1,13 +1,9 @@
-import { UserRole } from 'prisma/__generated__';
+import { Membership, UserRole } from 'prisma/__generated__';
 import { PrismaService } from 'src/prisma/prisma.service';
 export declare class MembershipService {
-    private prisma;
+    private readonly prisma;
     constructor(prisma: PrismaService);
-    createOrUpdateMembership(userId: string, galleryId: string, role: UserRole, currentUserRole: UserRole): Promise<{
-        userId: string;
-        role: import("prisma/__generated__").$Enums.UserRole;
-        galleryId: string;
-    }>;
+    createOrUpdateMembership(userId: string, galleryId: string, role: UserRole, currentUserRole: UserRole): Promise<Membership>;
     getAllMemberships(galleryId: string): Promise<{
         id: string;
         firstName: string;

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthWrapper } from "../AuthWraprer";
 import { RegisterSchema, TypeRegisterSchema } from "@/feature/auth/schemes";
 import { useRegisterMutation } from "../../hooks/useRegisterMutation";
-import Input from "@/shared/ui/Input";
+import {Input} from "@/shared/ui/Input";
 import Button from "@/shared/ui/Buton";
 
 export const RegisterForm = () => {
@@ -36,6 +36,7 @@ export const RegisterForm = () => {
     >
       <form className="w-full space-y-5" onSubmit={handleSubmit(onSubmit)}>
         <Input
+          id="firstName"
           label="First Name"
           placeholder="Your Name"
           disabled={isLoading}
@@ -43,6 +44,7 @@ export const RegisterForm = () => {
           error={errors.firstName?.message}
         />
         <Input
+          id="lastName"
           label="Last Name"
           placeholder="Your Last Name"
           disabled={isLoading}
@@ -50,6 +52,7 @@ export const RegisterForm = () => {
           error={errors.lastName?.message}
         />
         <Input
+          id="email"
           label="Email"
           type="text"
           placeholder="you@example.com"
@@ -58,6 +61,7 @@ export const RegisterForm = () => {
           error={errors.email?.message}
         />
         <Input
+          id="password"
           label="Password"
           type="password"
           placeholder="opwefD@1234"
@@ -66,6 +70,7 @@ export const RegisterForm = () => {
           error={errors.password?.message}
         />
         <Input
+          id="confirmPassword"
           label="Confirm Password"
           type="password"
           placeholder="opwefD@1234"
@@ -73,8 +78,16 @@ export const RegisterForm = () => {
           {...register("confirmPassword")}
           error={errors.confirmPassword?.message}
         />
-        <Button type="submit" disabled={isLoading} className="w-full px-5 py-3 flex justify-center items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95">{isLoading ? 'Registering...' : 'Register'}</Button>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-full px-5 py-3 flex justify-center items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
+        >
+          {isLoading ? 'Registering...' : 'Register'}
+        </Button>
       </form>
     </AuthWrapper>
   );
 };
+
+

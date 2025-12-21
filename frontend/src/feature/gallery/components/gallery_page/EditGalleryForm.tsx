@@ -11,6 +11,8 @@ import {
 
 import { useUpdateGallery } from "../../hooks/useUpdateGallery";
 import { useOneGallery } from "../../hooks/useOneGallery";
+import Button from "@/shared/ui/Buton";
+import { Input } from "@/shared/ui/Input";
 
 interface UpdateGalleryFormProps {
   galleryId?: string;
@@ -56,7 +58,8 @@ export const UpdateGalleryForm = ({
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-gray-700">Gallery name</label>
-        <input
+        <Input
+          id="title"
           type="text"
           {...register("title")}
           placeholder="For example: Alpha"
@@ -85,14 +88,14 @@ export const UpdateGalleryForm = ({
         )}
       </div>
 
-      <button
+      <Button
         type="submit"
         disabled={updateLoading}
         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium
                   hover:bg-blue-700 transition disabled:bg-gray-400"
       >
         {updateLoading ? "Saving..." : "Save changes"}
-      </button>
+      </Button>
     </form>
   );
 };

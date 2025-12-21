@@ -1,7 +1,7 @@
 export declare class GetGalleriesQueryDto {
     search?: string;
     sortBy?: 'createdAt' | 'title';
-    sortOrder?: 'asc' | 'desc';
+    orderBy?: 'asc' | 'desc';
     startDate?: string;
     endDate?: string;
     minImages?: number;

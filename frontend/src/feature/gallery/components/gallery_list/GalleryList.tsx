@@ -5,6 +5,7 @@ import { useGalleries } from '../../hooks/useGallery';
 import GalleryCard from './GalleryCard';
 import { PaginationComponent } from './Pagination';
 import GalleryFilters from './GalleryFilters';
+import Button from '@/shared/ui/Buton';
 
 export default function GalleryList() {
     const page = useSelector((state: any) => state.pagination.page);
@@ -22,22 +23,24 @@ export default function GalleryList() {
 
     if (isError) {
         return (
-            <div className="max-w-3xl mx-auto p-6">
-                <div className="bg-red-50 border border-red-300
-                                text-red-700 p-4 rounded-lg text-center">
-                    Error loading galleries
+            <div className="h-screen flex items-center justify-center">
+                <div className="max-w-3xl w-full p-6 text-center">
+                    <div className="bg-red-50 border border-red-300
+                        text-red-700 p-4 rounded-lg">
+                        Error loading galleries
+                    </div>
+                    <Button
+                        onClick={() => refetch()}
+                        className="mt-4 bg-blue-600 hover:bg-blue-700
+                     text-white font-semibold px-4 py-2 rounded-lg
+                     transition transform hover:scale-105"
+                    >
+                        Retry
+                    </Button>
                 </div>
-                <button
-                    onClick={() => refetch()}
-                    className="mt-4 bg-blue-600 hover:bg-blue-700
-                               text-white font-semibold px-6 py-2 rounded-lg
-                               transition transform hover:scale-105"
-                >
-                    Retry
-                </button>
             </div>
         );
-    }
+    } 
 
     return (
         <div className="max-w-7xl mx-auto px-10 py-10 space-y-8">
@@ -46,13 +49,17 @@ export default function GalleryList() {
                 {data?.map((gallery) => (
                     <GalleryCard key={gallery.id} gallery={gallery} />
                 ))}
+
             </div>
 
-            {meta?.totalPages && (
+            {meta?.totalPages ? (
                 <div className="mt-8">
                     <PaginationComponent totalPages={meta.totalPages} />
-                </div>
-            )}
+                </div>) :
+                (<div className="mt-8 flex justify-center items-center text-gray-500 text-lg">
+                    No pages
+                </div>)
+            }
         </div>
     );
 }

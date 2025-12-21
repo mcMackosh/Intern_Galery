@@ -7,6 +7,8 @@ import {
   TypeCreateGalleryScheme,
 } from "../../schemes/gallery.shemes";
 import { useCreateGallery } from "../../hooks/useCreateGallery";
+import { Input } from "@/shared/ui/Input";
+import Button from "@/shared/ui/Buton";
 
 interface CreateGalleryFormProps {
   onSuccess?: () => void;
@@ -40,7 +42,8 @@ export const CreateGalleryForm = ({ onSuccess }: CreateGalleryFormProps) => {
     >
       <div className="flex flex-col gap-2">
         <label className="text-sm font-semibold text-gray-800">Gallery Name</label>
-        <input
+        <Input
+          id="title"
           type="text"
           {...register("title")}
           placeholder="For example: Alpha"
@@ -64,14 +67,14 @@ export const CreateGalleryForm = ({ onSuccess }: CreateGalleryFormProps) => {
         {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>}
       </div>
 
-      <button
+      <Button
         type="submit"
         disabled={isLoading}
         className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-semibold
                   hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
         {isLoading ? "Creating..." : "Create"}
-      </button>
+      </Button>
     </form>
   );
 };

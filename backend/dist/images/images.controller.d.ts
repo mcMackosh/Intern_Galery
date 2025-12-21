@@ -4,17 +4,17 @@ export declare class ImagesController {
     private readonly imagesService;
     constructor(imagesService: ImagesService);
     uploadFiles(galleryId: string, files: Express.Multer.File[]): Promise<{
+        path: string;
         id: string;
         createdAt: Date;
-        path: string;
         galleryId: string;
         originalFilename: string;
     }[]>;
     getByGallery(galleryId: string, page: number, limit: number, order: 'asc' | 'desc'): Promise<{
         items: Record<string, {
+            path: string;
             id: string;
             createdAt: Date;
-            path: string;
             galleryId: string;
             originalFilename: string;
         }[]>;
@@ -27,16 +27,16 @@ export declare class ImagesController {
         deleted: string[];
     }>;
     moveImages(body: IdsImagesDto, targetGalleryId: string, galleryId: string): Promise<{
+        path: string;
         id: string;
         createdAt: Date;
-        path: string;
         galleryId: string;
         originalFilename: string;
     }[]>;
     copyImages(body: IdsImagesDto, targetGalleryId: string, galleryId: string): Promise<{
+        path: string;
         id: string;
         createdAt: Date;
-        path: string;
         galleryId: string;
         originalFilename: string;
     }[]>;

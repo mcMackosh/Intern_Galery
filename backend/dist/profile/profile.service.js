@@ -108,11 +108,17 @@ let ProfileService = class ProfileService {
             if (existing)
                 throw new common_1.ConflictException('Email already in use');
         }
+        let dataToUpdate = { ...dto };
+        if (dto.password) {
+            const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
+            dataToUpdate.password = hashedPassword;
+        }
         let updatedUser;
         try {
             updatedUser = await this.prismaService.user.update({
                 where: { id },
-                data: dto,
+                data: dataToUpdate,
                 select: profile_select_1.userSafeSelect,
             });
         }

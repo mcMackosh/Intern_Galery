@@ -61,82 +61,67 @@ let AuthService = class AuthService {
         this.redisService = redisService;
     }
     async login(dto) {
-        const existingUser = await this.profileService.findByEmail(dto.email);
-        if (!existingUser || !existingUser.password) {
-            throw new common_1.NotFoundException('User with this email does not exist. Please, register first or try another email.');
+        const user = await this.profileService.findByEmail(dto.email);
+        if (!user || !user.password) {
+            throw new common_1.NotFoundException('User not found');
         }
-        const isValidPassword = await bcrypt.compare(dto.password, existingUser.password);
-        if (!isValidPassword) {
-            throw new common_1.UnauthorizedException('Password is incorrect. Please, try again or reset your password.');
+        const isValid = await bcrypt.compare(dto.password, user.password);
+        if (!isValid) {
+            throw new common_1.UnauthorizedException('Invalid credentials');
         }
-        const accessToken = await this.generateToken('ACCESS', existingUser.id);
-        const refreshToken = await this.generateToken('REFRESH', existingUser.id);
-        try {
-            await this.redisService.setRefreshToken(existingUser.id, refreshToken);
-        }
-        catch {
-            throw new common_1.InternalServerErrorException('Error while saving refresh token');
-        }
-        return { user: existingUser, accessToken, refreshToken };
+        const accessToken = await this.generateToken('ACCESS', user.id);
+        const refreshToken = await this.generateToken('REFRESH', user.id);
+        await this.redisService.setRefreshToken(user.id, refreshToken);
+        return { user, accessToken, refreshToken };
     }
     async register(dto) {
-        let newUser = await this.profileService.create(dto);
-        const accessToken = await this.generateToken('ACCESS', newUser.id);
-        const refreshToken = await this.generateToken('REFRESH', newUser.id);
-        try {
-            await this.redisService.setRefreshToken(newUser.id, refreshToken);
-        }
-        catch {
-            throw new common_1.InternalServerErrorException('Error while saving token');
-        }
-        return { user: newUser, accessToken, refreshToken };
+        const user = await this.profileService.create(dto);
+        const accessToken = await this.generateToken('ACCESS', user.id);
+        const refreshToken = await this.generateToken('REFRESH', user.id);
+        await this.redisService.setRefreshToken(user.id, refreshToken);
+        return { user, accessToken, refreshToken };
     }
-    async generateToken(type, userId) {
-        const payload = { userId };
-        return this.jwtService.signAsync(payload, {
-            secret: this.configService.get('JWT_SECRET'),
-            expiresIn: type === 'ACCESS' ? '25m' : '2d',
-        });
-    }
-    async refreshTokens(token) {
+    async refreshTokens(refreshToken) {
         let payload;
         try {
-            payload = await this.jwtService.verifyAsync(token, {
-                secret: process.env.JWT_REFRESH_SECRET,
+            payload = await this.jwtService.verifyAsync(refreshToken, {
+                secret: this.configService.get('JWT_REFRESH_SECRET'),
             });
         }
         catch {
             throw new common_1.UnauthorizedException('Invalid refresh token');
         }
-        const saved = await this.redisService.getRefreshToken(payload.userId);
-        if (!saved || saved !== token) {
-            throw new common_1.InternalServerErrorException('Token mismatch');
+        const savedToken = await this.redisService.getRefreshToken(payload.userId);
+        if (!savedToken || savedToken !== refreshToken) {
+            throw new common_1.UnauthorizedException('Invalid refresh token');
         }
         const accessToken = await this.generateToken('ACCESS', payload.userId);
-        const refreshToken = await this.generateToken('REFRESH', payload.userId);
-        try {
-            await this.redisService.setRefreshToken(payload.userId, refreshToken);
+        const newRefreshToken = await this.generateToken('REFRESH', payload.userId);
+        await this.redisService.setRefreshToken(payload.userId, newRefreshToken);
+        const user = await this.profileService.findById(payload.userId);
+        if (!user) {
+            throw new common_1.UnauthorizedException('User not found');
         }
-        catch {
-            throw new common_1.UnauthorizedException('Error while saving refresh token');
-        }
-        const newUser = await this.profileService.findById(payload.userId);
-        return { user: newUser, accessToken, refreshToken };
+        return { user, accessToken, refreshToken: newRefreshToken };
     }
     async logout(userId) {
-        let deleted = await this.redisService.removeRefreshToken(userId);
-        if (deleted == 0) {
-            throw new common_1.UnauthorizedException('Logout error');
+        const deleted = await this.redisService.removeRefreshToken(userId);
+        if (!deleted) {
+            throw new common_1.UnauthorizedException('Invalid session');
         }
-        return deleted;
+        return { success: true };
     }
-    async logoutByToken(token) {
-        try {
-            await this.redisService.logoutByToken(token);
-        }
-        catch {
-            throw new common_1.InternalServerErrorException('Error while logout');
-        }
+    async logoutByToken(refreshToken) {
+        await this.redisService.logoutByToken(refreshToken);
+        return { success: true };
+    }
+    generateToken(type, userId) {
+        return this.jwtService.signAsync({ userId }, {
+            secret: type === 'ACCESS'
+                ? this.configService.get('JWT_ACCESS_SECRET')
+                : this.configService.get('JWT_REFRESH_SECRET'),
+            expiresIn: type === 'ACCESS' ? '25m' : '2d',
+        });
     }
 };
 exports.AuthService = AuthService;

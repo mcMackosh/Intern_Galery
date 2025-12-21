@@ -17,7 +17,7 @@ export const Button = ({
   onClick,
   className
 }: ButtonProps) => {
-  const baseClasses = 'py-2 text-white rounded-md focus:outline-none focus:ring-2 transition'
+  const baseClasses = 'py-2 px-4 py-2 text-white rounded-md focus:outline-none focus:ring-2 transition'
 
   const variantClasses: Record<string, string> = {
     default: 'bg-blue-600 hover:bg-blue-700 ',

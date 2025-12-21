@@ -46,164 +46,126 @@ exports.GalleryService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const __generated__1 = require("../../prisma/__generated__/index.js");
-const util_1 = require("util");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-const mkdir = (0, util_1.promisify)(fs.mkdir);
-const unlink = (0, util_1.promisify)(fs.unlink);
-const copyFile = (0, util_1.promisify)(fs.copyFile);
-const access = (0, util_1.promisify)(fs.access);
 let GalleryService = class GalleryService {
     prisma;
     constructor(prisma) {
         this.prisma = prisma;
     }
     async createGallery(dto, creatorId) {
-        try {
-            return await this.prisma.gallery.create({
-                data: {
-                    ...dto,
-                    memberships: {
-                        create: {
-                            userId: creatorId,
-                            role: __generated__1.UserRole.OWNER,
-                        },
+        return this.prisma.gallery.create({
+            data: {
+                ...dto,
+                memberships: {
+                    create: {
+                        userId: creatorId,
+                        role: __generated__1.UserRole.OWNER,
                     },
                 },
-            });
-        }
-        catch {
-            throw new common_1.InternalServerErrorException('Failed to create gallery');
-        }
+            },
+        });
     }
     async getAllGalleries(userId, page, limit, query) {
-        try {
-            const { search, sortBy = 'createdAt', sortOrder = 'desc', startDate, endDate, minImages, maxImages, } = query;
-            const skip = (page - 1) * limit;
-            const where = {
+        const { search, sortBy, orderBy, startDate, endDate, minImages, maxImages, } = query;
+        const skip = (page - 1) * limit;
+        const where = {
+            memberships: {
+                some: { userId },
+            },
+        };
+        if (search) {
+            where.title = {
+                contains: search,
+                mode: 'insensitive',
+            };
+        }
+        if (startDate || endDate) {
+            where.createdAt = {};
+            if (startDate)
+                where.createdAt.gte = new Date(startDate);
+            if (endDate)
+                where.createdAt.lte = new Date(endDate);
+        }
+        const galleries = await this.prisma.gallery.findMany({
+            where,
+            orderBy: {
+                [sortBy]: orderBy,
+            },
+            include: {
                 memberships: {
-                    some: { userId },
+                    where: { userId },
+                    select: { role: true },
                 },
-            };
-            if (search) {
-                where.title = {
-                    contains: search,
-                    mode: 'insensitive',
-                };
-            }
-            if (startDate || endDate) {
-                where.createdAt = {};
-                if (startDate)
-                    where.createdAt.gte = new Date(startDate);
-                if (endDate)
-                    where.createdAt.lte = new Date(endDate);
-            }
-            const galleries = await this.prisma.gallery.findMany({
-                where,
-                include: {
-                    memberships: {
-                        where: { userId },
-                        select: { role: true },
-                    },
-                    _count: {
-                        select: { images: true },
-                    },
+                _count: {
+                    select: { images: true },
                 },
-                orderBy: {
-                    [sortBy]: sortOrder,
-                },
-            });
-            const filteredGalleries = galleries.filter(gallery => {
-                const count = gallery._count.images;
-                if (minImages !== undefined && count < minImages)
-                    return false;
-                if (maxImages !== undefined && count > maxImages)
-                    return false;
-                return true;
-            });
-            const paginatedGalleries = filteredGalleries.slice(skip, skip + limit);
-            const formattedGalleries = paginatedGalleries.map(gallery => {
-                const role = gallery.memberships[0]?.role || null;
-                const { memberships, _count, ...rest } = gallery;
-                return {
-                    ...rest,
-                    role,
-                    imagesCount: _count.images,
-                };
-            });
-            return {
-                data: formattedGalleries,
-                meta: {
-                    total: filteredGalleries.length,
-                    page,
-                    limit,
-                    totalPages: Math.ceil(filteredGalleries.length / limit),
-                },
-            };
-        }
-        catch (err) {
-            throw new common_1.InternalServerErrorException('Failed to fetch galleries');
-        }
+            },
+        });
+        const filtered = galleries.filter(g => {
+            const count = g._count.images;
+            if (minImages !== undefined && count < minImages)
+                return false;
+            if (maxImages !== undefined && count > maxImages)
+                return false;
+            return true;
+        });
+        const paginated = filtered.slice(skip, skip + limit);
+        return {
+            data: paginated.map(g => ({
+                id: g.id,
+                title: g.title,
+                createdAt: g.createdAt,
+                role: g.memberships[0]?.role ?? null,
+                imagesCount: g._count.images,
+            })),
+            meta: {
+                total: filtered.length,
+                page,
+                limit,
+                totalPages: Math.ceil(filtered.length / limit),
+            },
+        };
     }
     async getGalleryInfoById(id, userId) {
-        try {
-            const gallery = await this.prisma.gallery.findFirst({
-                where: { id },
-                include: {
-                    memberships: {
-                        where: { userId },
-                        select: { role: true },
-                    },
+        const gallery = await this.prisma.gallery.findFirst({
+            where: { id },
+            include: {
+                memberships: {
+                    where: { userId },
+                    select: { role: true },
                 },
-            });
-            if (!gallery) {
-                throw new common_1.NotFoundException('Gallery not found');
-            }
-            const role = gallery.memberships[0]?.role || null;
-            const { memberships, ...galleryWithoutMemberships } = gallery;
-            return {
-                ...galleryWithoutMemberships,
-                role
-            };
+            },
+        });
+        if (!gallery) {
+            throw new common_1.NotFoundException('Gallery not found');
         }
-        catch (err) {
-            throw new common_1.InternalServerErrorException('Failed to fetch gallery');
-        }
+        return {
+            id: gallery.id,
+            title: gallery.title,
+            createdAt: gallery.createdAt,
+            role: gallery.memberships[0]?.role ?? null,
+        };
     }
     async updateGallery(galleryId, dto) {
-        try {
-            return await this.prisma.gallery.update({
-                where: { id: galleryId },
-                data: { ...dto },
-            });
-        }
-        catch {
-            throw new common_1.InternalServerErrorException('Failed to update gallery');
-        }
+        return this.prisma.gallery.update({
+            where: { id: galleryId },
+            data: dto,
+        });
     }
     async deleteGallery(galleryId) {
         const galleryFolder = path.join(process.cwd(), 'uploads', galleryId);
-        try {
-            await this.prisma.$transaction(async (tx) => {
-                await tx.gallery.delete({
-                    where: { id: galleryId },
-                });
-                try {
-                    if (fs.existsSync(galleryFolder)) {
-                        await fs.promises.rm(galleryFolder, {
-                            recursive: true,
-                            force: true,
-                        });
-                    }
-                }
-                catch (err) {
-                    throw new common_1.InternalServerErrorException('Failed to delete gallery folder from disk');
-                }
+        await this.prisma.$transaction(async (tx) => {
+            await tx.gallery.delete({
+                where: { id: galleryId },
             });
-        }
-        catch (err) {
-            throw new common_1.InternalServerErrorException('Failed to delete gallery');
-        }
+            if (fs.existsSync(galleryFolder)) {
+                await fs.promises.rm(galleryFolder, {
+                    recursive: true,
+                    force: true,
+                });
+            }
+        });
         return { message: 'Gallery deleted successfully' };
     }
 };

@@ -5,7 +5,7 @@ import { AuthWrapper } from "../AuthWraprer";
 import { LoginSheme, TypeLoginScheme } from "@/feature/auth/schemes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoginMutation } from "../../hooks/useLoginMutation";
-import Input from "@/shared/ui/Input";
+import {Input} from "@/shared/ui/Input";
 import Button from "@/shared/ui/Buton";
 
 export const LoginForm = () => {
@@ -32,6 +32,7 @@ export const LoginForm = () => {
     >
       <form className="w-full max-w-md mx-auto mt-6 space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <Input
+          id="email"
           label="Email"
           type="email"
           placeholder="you@example.com"
@@ -41,6 +42,7 @@ export const LoginForm = () => {
         />
 
         <Input
+          id="password"
           label="Password"
           type="password"
           placeholder="opwefD@1234"
@@ -49,7 +51,11 @@ export const LoginForm = () => {
           error={errors.password?.message}
         />
 
-        <Button disabled={isLoading} type="submit" className="w-full px-5 py-3 flex justify-center items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95">
+        <Button
+          disabled={isLoading}
+          type="submit"
+          className="w-full px-5 py-3 flex justify-center items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
+        >
           Login
         </Button>
       </form>

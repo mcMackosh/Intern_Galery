@@ -47,13 +47,8 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-const util_1 = require("util");
-const mkdir = (0, util_1.promisify)(fs.mkdir);
-const unlink = (0, util_1.promisify)(fs.unlink);
-const copyFile = (0, util_1.promisify)(fs.copyFile);
-const access = (0, util_1.promisify)(fs.access);
-const fs_extra_1 = require("fs-extra");
 const crypto_1 = require("crypto");
+const fs_extra_1 = require("fs-extra");
 let ImagesService = class ImagesService {
     prisma;
     UPLOAD_ROOT = path.join(process.cwd(), 'uploads');
@@ -62,44 +57,35 @@ let ImagesService = class ImagesService {
     }
     async ensureGalleryFolder(galleryId) {
         const folder = path.join(this.UPLOAD_ROOT, galleryId);
-        try {
-            await access(folder);
-        }
-        catch (e) {
-            await mkdir(folder, { recursive: true });
-        }
+        await fs.promises.mkdir(folder, { recursive: true });
         return folder;
+    }
+    toImageUrl(filePath) {
+        return path.posix.join(...filePath.split(path.sep));
     }
     async uploadImages(galleryId, files) {
         return this.prisma.$transaction(async (tx) => {
             const galleryFolder = await this.ensureGalleryFolder(galleryId);
-            const uploadPromises = files.map(async (file) => {
+            const createdImages = [];
+            for (const file of files) {
                 const fileGuid = (0, crypto_1.randomUUID)();
-                const relativePath = path.join(galleryId, `${fileGuid}_${file.originalname}`);
-                let image;
-                try {
-                    image = await tx.image.create({
-                        data: {
-                            path: relativePath,
-                            originalFilename: file.originalname,
-                            galleryId,
-                        },
-                    });
-                }
-                catch (err) {
-                    throw new common_1.InternalServerErrorException(`Failed to save file: ${file.originalname}`);
-                }
-                const fullFilePath = path.join(galleryFolder, `${fileGuid}_${file.originalname}`);
-                try {
-                    await fs.promises.writeFile(fullFilePath, file.buffer);
-                }
-                catch (err) {
-                    throw new common_1.InternalServerErrorException(`Failed to save file: ${file.originalname} to disk`);
-                }
-                return image;
-            });
-            const createdImages = await Promise.all(uploadPromises);
-            return createdImages;
+                const filename = `${fileGuid}_${file.originalname}`;
+                const relativePath = path.join(galleryId, filename);
+                const fullPath = path.join(galleryFolder, filename);
+                const image = await tx.image.create({
+                    data: {
+                        path: relativePath,
+                        originalFilename: file.originalname,
+                        galleryId,
+                    },
+                });
+                await fs.promises.writeFile(fullPath, file.buffer);
+                createdImages.push(image);
+            }
+            return createdImages.map(img => ({
+                ...img,
+                path: this.toImageUrl(img.path),
+            }));
         });
     }
     async deleteImages(ids, galleryId) {
@@ -114,91 +100,73 @@ let ImagesService = class ImagesService {
                 throw new common_1.ForbiddenException('Some images do not belong to this gallery');
             }
             await tx.image.deleteMany({
-                where: {
-                    id: { in: ids }
-                },
+                where: { id: { in: ids } },
             });
             for (const img of images) {
                 const fullPath = path.join(this.UPLOAD_ROOT, img.path);
-                try {
-                    await unlink(fullPath);
-                }
-                catch (err) {
-                    throw new common_1.InternalServerErrorException(`Failed to delete file: ${img.originalFilename}`);
-                }
+                await fs.promises.unlink(fullPath);
             }
             return { deleted: ids };
         });
     }
     async getImagesByGallery(galleryId, page = 1, limit = 20, order = 'desc') {
-        try {
-            const skip = (page - 1) * limit;
-            const [items, total] = await Promise.all([
-                this.prisma.image.findMany({
-                    where: { galleryId },
-                    orderBy: { createdAt: order },
-                    skip,
-                    take: limit,
-                }),
-                this.prisma.image.count({ where: { galleryId } }),
-            ]);
-            const grouped = items.reduce((acc, item) => {
-                const dateKey = item.createdAt.toISOString().split('T')[0];
-                if (!acc[dateKey])
-                    acc[dateKey] = [];
-                acc[dateKey].push(item);
-                return acc;
-            }, {});
-            return {
-                items: grouped,
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / limit),
-            };
-        }
-        catch (error) {
-            console.error(error);
-            throw new common_1.InternalServerErrorException('Problem with get images');
-        }
+        const skip = (page - 1) * limit;
+        const [items, total] = await Promise.all([
+            this.prisma.image.findMany({
+                where: { galleryId },
+                orderBy: { createdAt: order },
+                skip,
+                take: limit,
+            }),
+            this.prisma.image.count({ where: { galleryId } }),
+        ]);
+        const mapped = items.map(item => ({
+            ...item,
+            path: this.toImageUrl(item.path),
+        }));
+        const grouped = mapped.reduce((acc, item) => {
+            const key = item.createdAt.toISOString().split('T')[0];
+            acc[key] ??= [];
+            acc[key].push(item);
+            return acc;
+        }, {});
+        return {
+            items: grouped,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+        };
     }
     async moveImages(ids, targetGalleryId, galleryId) {
         return this.prisma.$transaction(async (tx) => {
-            let images;
-            try {
-                images = await tx.image.findMany({
-                    where: { id: { in: ids }, galleryId },
-                });
-            }
-            catch {
-                throw new common_1.InternalServerErrorException(`Cannot move file`);
+            const images = await tx.image.findMany({
+                where: { id: { in: ids }, galleryId },
+            });
+            if (images.length !== ids.length) {
+                throw new common_1.ForbiddenException('Some images do not belong to this gallery');
             }
             await this.ensureGalleryFolder(targetGalleryId);
             const updated = [];
             for (const img of images) {
-                const src = path.join(this.UPLOAD_ROOT, img.path);
                 const filename = path.basename(img.path);
+                const src = path.join(this.UPLOAD_ROOT, img.path);
                 const destRel = path.join(targetGalleryId, filename);
                 const dest = path.join(this.UPLOAD_ROOT, destRel);
-                try {
-                    await (0, fs_extra_1.move)(src, dest, { overwrite: true });
-                }
-                catch {
-                    throw new common_1.InternalServerErrorException(`Cannot move file from ${src} to ${dest}`);
-                }
-                let updatedImg;
-                try {
-                    updatedImg = await tx.image.update({
-                        where: { id: img.id },
-                        data: { galleryId: targetGalleryId, path: destRel },
-                    });
-                }
-                catch {
-                    throw new common_1.InternalServerErrorException(`Cannot move file from ${src} to ${dest}`);
-                }
+                await (0, fs_extra_1.move)(src, dest, { overwrite: true });
+                const updatedImg = await tx.image.update({
+                    where: { id: img.id },
+                    data: {
+                        galleryId: targetGalleryId,
+                        path: destRel,
+                    },
+                });
                 updated.push(updatedImg);
             }
-            return updated;
+            return updated.map(img => ({
+                ...img,
+                path: this.toImageUrl(img.path),
+            }));
         });
     }
     async copyImages(ids, targetGalleryId, galleryId) {
@@ -206,19 +174,18 @@ let ImagesService = class ImagesService {
             const images = await tx.image.findMany({
                 where: { id: { in: ids }, galleryId },
             });
+            if (images.length !== ids.length) {
+                throw new common_1.ForbiddenException('Some images do not belong to this gallery');
+            }
             await this.ensureGalleryFolder(targetGalleryId);
             const created = [];
             for (const img of images) {
-                const src = path.join(this.UPLOAD_ROOT, img.path);
                 const fileGuid = (0, crypto_1.randomUUID)();
-                const destRel = path.join(targetGalleryId, `${fileGuid}_${img.originalFilename}`);
+                const filename = `${fileGuid}_${img.originalFilename}`;
+                const src = path.join(this.UPLOAD_ROOT, img.path);
+                const destRel = path.join(targetGalleryId, filename);
                 const dest = path.join(this.UPLOAD_ROOT, destRel);
-                try {
-                    await copyFile(src, dest);
-                }
-                catch (err) {
-                    throw new common_1.InternalServerErrorException(`Cannot copy file from ${src} to ${dest}: ${err.message}`);
-                }
+                await fs.promises.copyFile(src, dest);
                 const newImage = await tx.image.create({
                     data: {
                         path: destRel,
@@ -228,7 +195,10 @@ let ImagesService = class ImagesService {
                 });
                 created.push(newImage);
             }
-            return created;
+            return created.map(img => ({
+                ...img,
+                path: this.toImageUrl(img.path),
+            }));
         });
     }
 };

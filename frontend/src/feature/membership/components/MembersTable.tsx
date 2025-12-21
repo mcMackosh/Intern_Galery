@@ -4,6 +4,7 @@ import { IUserMembership, UserRole } from '@/types/membership'
 import { useChangeRole } from '@/feature/membership/hooks/useChangeRole'
 import { useDeleteUser } from '@/feature/membership/hooks/useDeleteUser'
 import { Trash } from "lucide-react";
+import { Select } from '@/shared/ui/Select';
 
 interface MembersTableProps {
   members: IUserMembership[]
@@ -52,28 +53,14 @@ export function MembersTable({ members, isLoading }: MembersTableProps) {
             </td>
 
             <td className="px-5 py-3 align-middle">
-              <select
+              <Select
                 value={m.role}
-                onChange={(e) =>
-                  changeRole.mutate({ userId: m.id, role: e.target.value as UserRole })
-                }
-                className="
-                  px-3 py-1.5 
-                  rounded-lg
-                  border border-gray-300
-                  text-sm
-                  bg-white
-                  focus:ring-2 focus:ring-blue-400
-                  outline-none
-                  transition
-                "
-              >
-                {Object.values(UserRole).map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => changeRole.mutate({ userId: m.id, role: value })}
+                options={Object.values(UserRole).map((role) => ({
+                  value: role,
+                  label: role,
+                }))}
+              />
             </td>
 
             <td className="px-5 py-3 text-sm text-gray-700 align-middle">

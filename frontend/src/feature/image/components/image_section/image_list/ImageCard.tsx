@@ -18,7 +18,7 @@ const IC: React.FC<Props> = ({ image, selected, onSelect, onOpen }) => {
             <div className="relative w-full h-48 cursor-pointer overflow-hidden">
                 <div className="relative w-64 h-48">
                     <Image
-                        src={image.path.replace(/\\/g, '/')}
+                        src={image.path}
                         alt={image.originalFilename || 'Gallery image'}
                         fill
                         unoptimized

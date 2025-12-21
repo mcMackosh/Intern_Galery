@@ -18,6 +18,7 @@ exports.IdsImagesDto = IdsImagesDto;
 __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ArrayNotEmpty)(),
+    (0, class_validator_1.IsUUID)('4', { each: true }),
     __metadata("design:type", Array)
 ], IdsImagesDto.prototype, "ids", void 0);
 //# sourceMappingURL=ids-images.dto.js.map

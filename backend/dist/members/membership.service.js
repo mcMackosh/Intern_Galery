@@ -19,18 +19,18 @@ let MembershipService = class MembershipService {
         this.prisma = prisma;
     }
     async createOrUpdateMembership(userId, galleryId, role, currentUserRole) {
-        let existing = null;
-        if (role == __generated__1.UserRole.OWNER)
-            throw new common_1.InternalServerErrorException('Role Owner don`t assign');
-        try {
-            existing = await this.prisma.membership.findUnique({
-                where: { galleryId_userId: { galleryId, userId } },
-                include: { user: true },
-            });
+        if (role === __generated__1.UserRole.OWNER) {
+            throw new common_1.BadRequestException('OWNER role cannot be assigned');
         }
-        catch {
-            throw new common_1.InternalServerErrorException('Failed to check existing membership');
+        const userExisting = await this.prisma.user.findUnique({
+            where: { id: userId },
+        });
+        if (!userExisting) {
+            throw new common_1.ForbiddenException('User is uncorrect');
         }
+        const existing = await this.prisma.membership.findUnique({
+            where: { galleryId_userId: { galleryId, userId } },
+        });
         if (currentUserRole === __generated__1.UserRole.ADMIN) {
             if (existing && existing.role !== __generated__1.UserRole.REGULAR) {
                 throw new common_1.ForbiddenException('Admin can manage only REGULAR members');
@@ -39,69 +39,60 @@ let MembershipService = class MembershipService {
                 throw new common_1.ForbiddenException('Admin can assign only REGULAR role');
             }
         }
-        if (existing?.role === __generated__1.UserRole.OWNER && currentUserRole !== __generated__1.UserRole.OWNER) {
+        if (existing?.role === __generated__1.UserRole.OWNER &&
+            currentUserRole !== __generated__1.UserRole.OWNER) {
             throw new common_1.ForbiddenException('Only OWNER can modify OWNER membership');
         }
         if (existing) {
-            try {
-                return await this.prisma.membership.update({
-                    where: { galleryId_userId: { galleryId, userId } },
-                    data: { role },
-                });
-            }
-            catch {
-                throw new common_1.InternalServerErrorException('Failed to update membership');
-            }
-        }
-        try {
-            return await this.prisma.membership.create({
-                data: { userId, galleryId, role },
+            return this.prisma.membership.update({
+                where: { galleryId_userId: { galleryId, userId } },
+                data: { role },
             });
         }
-        catch {
-            throw new common_1.InternalServerErrorException('Failed to create membership');
-        }
+        return this.prisma.membership.create({
+            data: { userId, galleryId, role },
+        });
     }
     async getAllMemberships(galleryId) {
-        try {
-            const memberships = await this.prisma.membership.findMany({
-                where: { galleryId },
-                include: {
-                    user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        const memberships = await this.prisma.membership.findMany({
+            where: { galleryId },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
                 },
-            });
-            return memberships.map((m) => ({
-                id: m.user.id,
-                firstName: m.user.firstName,
-                lastName: m.user.lastName,
-                email: m.user.email,
-                role: m.role,
-            }));
-        }
-        catch {
-            throw new common_1.InternalServerErrorException('Failed to fetch memberships');
-        }
+            },
+        });
+        return memberships.map(m => ({
+            id: m.user.id,
+            firstName: m.user.firstName,
+            lastName: m.user.lastName,
+            email: m.user.email,
+            role: m.role,
+        }));
     }
     async deleteMembership(galleryId, userId, currentUserRole) {
         const membership = await this.prisma.membership.findUnique({
             where: { galleryId_userId: { galleryId, userId } },
         });
-        if (!membership)
+        if (!membership) {
             throw new common_1.NotFoundException('Membership not found');
-        if (currentUserRole === __generated__1.UserRole.ADMIN && membership.role !== __generated__1.UserRole.REGULAR) {
+        }
+        if (currentUserRole === __generated__1.UserRole.ADMIN &&
+            membership.role !== __generated__1.UserRole.REGULAR) {
             throw new common_1.ForbiddenException('Admin can delete only REGULAR members');
         }
-        if (membership.role === __generated__1.UserRole.OWNER && currentUserRole !== __generated__1.UserRole.OWNER) {
+        if (membership.role === __generated__1.UserRole.OWNER &&
+            currentUserRole !== __generated__1.UserRole.OWNER) {
             throw new common_1.ForbiddenException('Only OWNER can delete OWNER');
         }
-        try {
-            await this.prisma.membership.delete({
-                where: { galleryId_userId: { galleryId, userId } },
-            });
-        }
-        catch {
-            throw new common_1.InternalServerErrorException('Failed to delete membership');
-        }
+        await this.prisma.membership.delete({
+            where: { galleryId_userId: { galleryId, userId } },
+        });
         return true;
     }
 };
