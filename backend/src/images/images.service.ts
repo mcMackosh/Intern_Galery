@@ -4,7 +4,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Image } from 'prisma/__generated__';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
 import { move } from 'fs-extra';
@@ -17,7 +17,7 @@ export class ImagesService {
 
   private async ensureGalleryFolder(galleryId: string) {
     const folder = path.join(this.UPLOAD_ROOT, galleryId);
-    await fs.promises.mkdir(folder, { recursive: true });
+    await fs.mkdir(folder, { recursive: true });
     return folder;
   }
 
@@ -45,7 +45,7 @@ export class ImagesService {
           },
         });
 
-        await fs.promises.writeFile(fullPath, file.buffer);
+        await fs.writeFile(fullPath, file.buffer);
         createdImages.push(image);
       }
 
@@ -77,7 +77,7 @@ export class ImagesService {
 
       for (const img of images) {
         const fullPath = path.join(this.UPLOAD_ROOT, img.path);
-        await fs.promises.unlink(fullPath);
+        await fs.unlink(fullPath);
       }
 
       return { deleted: ids };
@@ -192,7 +192,7 @@ export class ImagesService {
         const destRel = path.join(targetGalleryId, filename);
         const dest = path.join(this.UPLOAD_ROOT, destRel);
 
-        await fs.promises.copyFile(src, dest);
+        await fs.copyFile(src, dest);
 
         const newImage = await tx.image.create({
           data: {

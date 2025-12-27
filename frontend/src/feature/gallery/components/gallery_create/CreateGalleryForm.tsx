@@ -40,8 +40,11 @@ export const CreateGalleryForm = ({ onSuccess }: CreateGalleryFormProps) => {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-6 rounded-xl"
     >
+      {/* Title */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold text-gray-800">Gallery Name</label>
+        <label htmlFor="title" className="text-sm font-semibold text-gray-800">
+          Gallery Name
+        </label>
         <Input
           id="title"
           type="text"
@@ -54,9 +57,13 @@ export const CreateGalleryForm = ({ onSuccess }: CreateGalleryFormProps) => {
         {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>}
       </div>
 
+      {/* Description */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold text-gray-800">Description</label>
+        <label htmlFor="description" className="text-sm font-semibold text-gray-800">
+          Description
+        </label>
         <textarea
+          id="description" // <-- Додали id
           {...register("description")}
           placeholder="Short description"
           rows={3}

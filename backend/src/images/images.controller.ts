@@ -82,8 +82,8 @@ export class ImagesController {
     @Body() body: IdsImagesDto,
     @Param('targetGalleryId') targetGalleryId: string,
     @Param('galleryId') galleryId: string) {
-    if (!body?.ids || !Array.isArray(body.ids) || !targetGalleryId) {
-      throw new BadRequestException('ids array and targetGalleryId are required');
+    if (!body.ids?.length || !targetGalleryId) {
+      throw new BadRequestException('ids and targetGalleryId are required');
     }
     return this.imagesService.moveImages(body.ids, targetGalleryId, galleryId);
   }
@@ -93,8 +93,8 @@ export class ImagesController {
   async copyImages(@Body() body: IdsImagesDto,
     @Param('targetGalleryId') targetGalleryId: string,
     @Param('galleryId') galleryId: string) {
-    if (!body?.ids || !Array.isArray(body.ids) || !targetGalleryId) {
-      throw new BadRequestException('ids array and targetGalleryId are required');
+    if (!body.ids?.length || !targetGalleryId) {
+      throw new BadRequestException('ids and targetGalleryId are required');
     }
     return this.imagesService.copyImages(body.ids, targetGalleryId, galleryId);
   }

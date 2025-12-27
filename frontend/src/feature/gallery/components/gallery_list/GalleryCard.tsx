@@ -1,4 +1,5 @@
-import { ModalWithTrigger } from '@/shared/ui/Modal/ModalWithTrigger';
+'use client';
+
 import { IGallery } from '@/types/gallery';
 import { Image, Trash2, Edit } from 'lucide-react';
 import { UpdateGalleryForm } from '../gallery_page/EditGalleryForm';
@@ -22,10 +23,10 @@ export default function GalleryCard({ gallery }: Props) {
     setIsDeleteOpen(false);
   }
 
-
   return (
     <>
       <div
+        data-testid="gallery-card"
         className="relative bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
         onClick={() => router.push(`/gallery/${gallery.id}`)}
       >
@@ -33,22 +34,27 @@ export default function GalleryCard({ gallery }: Props) {
           {(gallery.role === UserRole.ADMIN || gallery.role === UserRole.OWNER) && (
             <>
               <button
+                data-testid="edit-gallery"
                 className="p-2 z-1 bg-white rounded-full shadow hover:bg-gray-100 transition"
                 onClick={(e) => { e.stopPropagation(); setIsEditOpen(true); }}
               >
                 <Edit className="w-4 h-4 text-blue-600" />
               </button>
-              {gallery.role === UserRole.OWNER ? 
-              <button
-                className="p-2 z-1 bg-white rounded-full shadow hover:bg-gray-100 transition"
-                onClick={(e) => { e.stopPropagation(); setIsDeleteOpen(true); }}
-              >
-                <Trash2 className="w-4 h-4 text-red-600" />
-              </button> : null}
-              
+              {gallery.role === UserRole.OWNER && (
+                <button
+                  data-testid="delete-gallery"
+                  className="p-2 z-1 bg-white rounded-full shadow hover:bg-gray-100 transition"
+                  onClick={(e) => { e.stopPropagation(); setIsDeleteOpen(true); }}
+                >
+                  <Trash2 className="w-4 h-4 text-red-600" />
+                </button>
+              )}
             </>
           )}
-          <span className="inline-block z-1 px-4 py-1 text-sm font-medium rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md">
+          <span 
+            data-testid="gallery-role"
+            className="inline-block z-1 px-4 py-1 text-sm font-medium rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md"
+          >
             {gallery?.role || 'USER'}
           </span>
         </div>
@@ -67,6 +73,7 @@ export default function GalleryCard({ gallery }: Props) {
       </div>
 
       <BaseModal
+        data-testid="edit-gallery-modal"
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
         className="w-full max-w-lg p-6 md:p-8 bg-white rounded-2xl shadow-xl"
@@ -75,22 +82,26 @@ export default function GalleryCard({ gallery }: Props) {
       </BaseModal>
 
       <BaseModal
+        data-testid="delete-gallery-modal"
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         className="w-full max-w-md p-6 md:p-8 bg-white rounded-2xl shadow-xl"
       >
         <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
-        <p className="mb-6">Are you sure you want to delete the gallery <strong>{gallery.title}</strong>?</p>
+        <p className="mb-6">
+          Are you sure you want to delete the gallery <strong>{gallery.title}</strong>?
+        </p>
         <div className="flex justify-end gap-3">
           <Button
-            variant='secondary'
-            className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+            data-testid="cancel-delete-gallery"
+            variant="secondary"
             onClick={() => setIsDeleteOpen(false)}
           >
             Cancel
           </Button>
           <Button
-            variant='danger'
+            data-testid="confirm-delete-gallery"
+            variant="danger"
             onClick={handleDelete}
           >
             Delete

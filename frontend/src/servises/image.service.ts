@@ -27,8 +27,6 @@ class ImagesService {
     const formData = new FormData();
     files.forEach(file => formData.append('images', file));
 
-    console.log(galleryId)
-
     const { data } = await api.post<UploadImageResponse>(
       `galleries/${galleryId}/image/upload`,
       formData,

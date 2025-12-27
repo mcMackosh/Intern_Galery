@@ -5,7 +5,7 @@ import { BaseModal } from '@/shared/ui/Modal/BaseModal';
 import { useGalleries } from '@/feature/gallery/hooks/useGallery';
 import ReactPaginate from 'react-paginate';
 import { ArrowRight, ChevronLeft, ChevronRight, Image, User } from 'lucide-react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
 interface Props {
     onClose: () => void;
@@ -17,29 +17,20 @@ export const GallerySelectModal: React.FC<Props> = ({ onClose, onSelect }) => {
     const { data, meta, isLoading, isError } = useGalleries(page);
 
     const params = useParams();
-    const currentGalleryId = params.galleryId;
-
+    const currentGalleryId = params?.galleryId;
 
     const handlePageClick = (selectedItem: { selected: number }) => {
         setPage(selectedItem.selected + 1);
     };
 
-    if (isLoading) return <BaseModal isOpen onClose={onClose}>Loading...</BaseModal>;
-    if (isError) return <BaseModal isOpen onClose={onClose}>Error loading galleries</BaseModal>;
+    if (isLoading) return <BaseModal data-testid="gallery-modal" isOpen onClose={onClose}>Loading...</BaseModal>;
+    if (isError) return <BaseModal data-testid="gallery-modal" isOpen onClose={onClose}>Error loading galleries</BaseModal>;
 
     return (
-        <BaseModal
-            isOpen
-            onClose={onClose}
-            className='w-150'
-        >
+        <BaseModal data-testid="gallery-modal" isOpen onClose={onClose} className='w-150'>
             <div className="flex flex-col text-center shrink-0 px-5 py-4 border-b ">
-                <h2 className="text-xl font-semibold text-gray-900">
-                    Pick a Gallery
-                </h2>
-                <p className="text-sm text-gray-500 mt-1">
-                    Select a gallery to execute the action
-                </p>
+                <h2 data-testid="gallery-title" className="text-xl font-semibold text-gray-900">Pick a Gallery</h2>
+                <p className="text-sm text-gray-500 mt-1">Select a gallery to execute the action</p>
             </div>
             <div className="flex flex-col flex-1 min-h-0">
                 <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
@@ -49,6 +40,7 @@ export const GallerySelectModal: React.FC<Props> = ({ onClose, onSelect }) => {
                         return (
                             <div
                                 key={gallery.id}
+                                data-testid={`gallery-item-${gallery.id}`}
                                 className={`flex items-center justify-between p-3 border rounded-xl transition-transform duration-200
                                     ${isCurrent
                                         ? "bg-gray-200 cursor-not-allowed" 
@@ -59,21 +51,17 @@ export const GallerySelectModal: React.FC<Props> = ({ onClose, onSelect }) => {
                                 <div className="flex items-center gap-3">
                                     <div className={`p-2 rounded-full ${isCurrent ? "bg-gray-400" : "bg-blue-100"}`}>
                                         <Image size={24} className={isCurrent ? "text-gray-200" : "text-blue-600"} />
-                                        
-                                       
                                     </div>
                                     <div>
                                         <h3 className="text-gray-800 font-medium">{gallery.title}</h3>
                                         <p className="text-gray-500 text-sm flex items-center gap-1">
                                             <User size={14} /> {gallery.role || 'No role'}
-                                           
                                         </p>
                                     </div>
                                 </div>
-                                {isCurrent && <div className='text-center text-red-600'>Current Gallery</div>}
+                                {isCurrent && <div data-testid="current-gallery" className='text-center text-red-600'>Current Gallery</div>}
                                 <div className={`transition-colors ${isCurrent ? "text-gray-400" : "text-gray-400 hover:text-blue-500"}`}>
                                     <ArrowRight />
-                                    
                                 </div>
                             </div>
                         );
@@ -83,21 +71,9 @@ export const GallerySelectModal: React.FC<Props> = ({ onClose, onSelect }) => {
                 {meta?.totalPages && meta.totalPages > 1 && (
                     <div className="px-4 py-3 border-t border-gray-20">
                         <ReactPaginate
-                            previousLabel={
-                                <div className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-transform duration-200 transform hover:scale-105">
-                                    <ChevronLeft size={20} />
-                                </div>
-                            }
-                            nextLabel={
-                                <div className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-transform duration-200 transform hover:scale-105">
-                                    <ChevronRight size={20} />
-                                </div>
-                            }
-                            breakLabel={
-                                <div className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 text-gray-600 cursor-default bg-gray-50">
-                                    ...
-                                </div>
-                            }
+                            previousLabel={<button data-testid="paginate-prev"><ChevronLeft size={20} /></button>}
+                            nextLabel={<button data-testid="paginate-next"><ChevronRight size={20} /></button>}
+                            breakLabel={<div>...</div>}
                             pageCount={meta.totalPages}
                             marginPagesDisplayed={2}
                             pageRangeDisplayed={5}
@@ -106,7 +82,6 @@ export const GallerySelectModal: React.FC<Props> = ({ onClose, onSelect }) => {
                             containerClassName="flex gap-2 justify-center"
                             pageLinkClassName="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-transform duration-200 transform hover:scale-105"
                             activeClassName="bg-blue-500 text-white border-blue-500 scale-110"
-
                         />
                     </div>
                 )}
