@@ -1,12 +1,9 @@
-import axios from 'axios';
 import {
-  Image,
   GetImagesResponse,
   UploadImageResponse,
   MoveCopyImageResponse,
   DeleteImagesResponse,
-  DeleteImagesDto,
-  MoveImagesDto,
+  SelectedImagesDto
 } from '@/types/image';
 import api from "@/shared/lib/api/api-interceptor";
 
@@ -37,10 +34,10 @@ class ImagesService {
     return data;
   }
 
-  async deleteImages(galleryId: string, ids: string[]): Promise<DeleteImagesResponse> {
+  async deleteImages(galleryId: string, ids: SelectedImagesDto): Promise<DeleteImagesResponse> {
     const { data } = await api.delete<DeleteImagesResponse>(
       `galleries/${galleryId}/image`,
-      { data: { ids } as DeleteImagesDto }
+      { data: ids }
     );
     return data;
   }
@@ -48,11 +45,11 @@ class ImagesService {
   async moveImages(
     galleryId: string,
     targetGalleryId: string,
-    ids: string[]
+    ids: SelectedImagesDto
   ): Promise<MoveCopyImageResponse> {
     const { data } = await api.post<MoveCopyImageResponse>(
       `galleries/${galleryId}/image/move/${targetGalleryId}`,
-      { ids } as MoveImagesDto
+      ids
     );
     return data;
   }
@@ -60,11 +57,11 @@ class ImagesService {
   async copyImages(
     galleryId: string,
     targetGalleryId: string,
-    ids: string[]
+    ids: SelectedImagesDto
   ): Promise<MoveCopyImageResponse> {
     const { data } = await api.post<MoveCopyImageResponse>(
       `galleries/${galleryId}/image/copy/${targetGalleryId}`,
-      { ids } as MoveImagesDto
+      ids
     );
     return data;
   }

@@ -1,5 +1,6 @@
 import { imageService } from '@/servises/image.service';
 import { toastMessage } from '@/shared/utils/tost';
+import { SelectedImagesDto } from '@/types/image';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
@@ -11,11 +12,11 @@ export const useDeleteImages = () => {
   const galleryId = params?.galleryId as string | undefined;
 
   const mutation = useMutation({
-    mutationFn: async (ids: string[]) => {
-      if (!ids || ids.length === 0) throw new Error('No image IDs provided');
+    mutationFn: async (data: SelectedImagesDto) => {
+      if (!data.ids || data.ids.length === 0) throw new Error('No image IDs provided');
       if (!galleryId) throw new Error('No image IDs provided');
 
-      return imageService.deleteImages(galleryId, ids);
+      return imageService.deleteImages(galleryId, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['images'] });

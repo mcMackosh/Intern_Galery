@@ -1,6 +1,6 @@
 import { TypeCreateGalleryScheme, TypeUpdateGalleryScheme } from "@/feature/gallery/schemes/gallery.shemes";
 import api from "@/shared/lib/api/api-interceptor";
-import { GalleryFilters, IGallery, IGalleryListResponse } from "@/types/gallery";
+import { IGallery, IGalleryListResponse } from "@/types/gallery";
 import { CONFIG } from "./config";
 
 class GalleryService {

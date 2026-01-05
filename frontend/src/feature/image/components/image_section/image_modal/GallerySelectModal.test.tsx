@@ -24,7 +24,7 @@ describe('GallerySelectModal', () => {
   it('renders loading state', () => {
     mockUseGalleries.mockReturnValue({ data: null, isLoading: true, isError: false, meta: null });
     render(<GallerySelectModal onClose={onClose} onSelect={onSelect} />);
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByTestId('loader')).toBeInTheDocument();
   });
 
   it('renders error state', () => {

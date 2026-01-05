@@ -9,13 +9,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProfileDto = void 0;
+exports.ResetPasswordDto = exports.ProfileDto = void 0;
 const class_validator_1 = require("class-validator");
 class ProfileDto {
     firstName;
     lastName;
     email;
-    password;
 }
 exports.ProfileDto = ProfileDto;
 __decorate([
@@ -39,12 +38,19 @@ __decorate([
     (0, class_validator_1.IsEmail)({}, { message: 'Invalid email format' }),
     __metadata("design:type", String)
 ], ProfileDto.prototype, "email", void 0);
+class ResetPasswordDto {
+    oldPassword;
+    newPassword;
+}
+exports.ResetPasswordDto = ResetPasswordDto;
 __decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.MinLength)(8, { message: 'Password must be at least 8 characters long' }),
-    (0, class_validator_1.Matches)(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*/, {
-        message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
-    }),
+    (0, class_validator_1.IsString)({ message: 'Old password must be a string' }),
     __metadata("design:type", String)
-], ProfileDto.prototype, "password", void 0);
+], ResetPasswordDto.prototype, "oldPassword", void 0);
+__decorate([
+    (0, class_validator_1.IsString)({ message: 'Password must be a string.' }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Password cannot be empty.' }),
+    (0, class_validator_1.MinLength)(6, { message: 'Password must be at least 6 characters long.' }),
+    __metadata("design:type", String)
+], ResetPasswordDto.prototype, "newPassword", void 0);
 //# sourceMappingURL=profile.dto.js.map

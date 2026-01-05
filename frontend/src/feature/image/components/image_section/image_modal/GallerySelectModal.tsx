@@ -6,6 +6,7 @@ import { useGalleries } from '@/feature/gallery/hooks/useGallery';
 import ReactPaginate from 'react-paginate';
 import { ArrowRight, ChevronLeft, ChevronRight, Image, User } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { Loader } from '@/shared/ui/Loader';
 
 interface Props {
     onClose: () => void;
@@ -23,7 +24,7 @@ export const GallerySelectModal: React.FC<Props> = ({ onClose, onSelect }) => {
         setPage(selectedItem.selected + 1);
     };
 
-    if (isLoading) return <BaseModal data-testid="gallery-modal" isOpen onClose={onClose}>Loading...</BaseModal>;
+    if (isLoading) return <BaseModal data-testid="gallery-modal" isOpen onClose={onClose}><Loader/></BaseModal>;
     if (isError) return <BaseModal data-testid="gallery-modal" isOpen onClose={onClose}>Error loading galleries</BaseModal>;
 
     return (

@@ -1,9 +1,10 @@
 'use client';
 
 import React, { memo } from 'react';
-import Image from 'next/image';
+import NextImage from 'next/image';
 import { Check } from 'lucide-react';
 import { Image as ImageType } from '@/types/image';
+import { SERVER_URL } from '@/env';
 
 interface Props {
     image: ImageType;
@@ -17,14 +18,14 @@ const IC: React.FC<Props> = ({ image, selected, onSelect, onOpen }) => {
         <div className="relative w-64 rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-lg overflow-hidden group">
             <div className="relative w-full h-48 cursor-pointer overflow-hidden">
                 <div className="relative w-64 h-48">
-                    <Image
-                        src={image.path}
+                    <NextImage
+                        src={`${SERVER_URL}/uploads/${image.path}`}
                         alt={image.originalFilename || 'Gallery image'}
                         fill
-                        unoptimized
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         className="transition-transform duration-300 group-hover:scale-105"
                         onClick={onOpen}
+                        unoptimized
                     />
                 </div>
                 <div

@@ -4,11 +4,9 @@ import { useGalleries } from './useGallery';
 import { galleryService } from '../../../servises/gallery.service';
 import { IGalleryListResponse } from '@/types/gallery';
 
-// Мок galleryService
 jest.mock('../../../servises/gallery.service');
 const mockedGalleryService = galleryService as jest.Mocked<typeof galleryService>;
 
-// Мок useSearchParams
 jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
 }));
@@ -32,8 +30,8 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe('useGalleries', () => {
   const mockData: IGalleryListResponse = {
     data: [
-      { id: '1', title: 'Gallery 1', description: 'Desc 1', role: UserRole.ADMIN },
-      { id: '2', title: 'Gallery 2', description: 'Desc 2', role: UserRole.REGULAR },
+      { id: '1', title: 'Gallery 1', description: 'Desc 1', role: UserRole.ADMIN, images: [] },
+      { id: '2', title: 'Gallery 2', description: 'Desc 2', role: UserRole.REGULAR, images: [] },
     ],
     meta: { total: 2, page: 1, limit: 10, totalPages: 1 },
   };
@@ -100,7 +98,7 @@ describe('useGalleries', () => {
     await waitFor(() => expect(result.current.data).toEqual(mockData.data));
 
     mockedGalleryService.getAllGalleries.mockResolvedValue({
-      data: [{ id: '3', title: 'Gallery 3', description: 'Desc 3', role: UserRole.REGULAR }],
+      data: [{ id: '3', title: 'Gallery 3', description: 'Desc 3', role: UserRole.REGULAR, images: []}],
       meta: { total: 1, page: 1, limit: 10, totalPages: 1 },
     });
 
@@ -108,7 +106,7 @@ describe('useGalleries', () => {
 
     await waitFor(() =>
       expect(result.current.data).toEqual([
-        { id: '3', title: 'Gallery 3', description: 'Desc 3', role: UserRole.REGULAR },
+        { id: '3', title: 'Gallery 3', description: 'Desc 3', role: UserRole.REGULAR, images: []},
       ])
     );
   });

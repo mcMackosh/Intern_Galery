@@ -5,8 +5,9 @@ import { AuthWrapper } from "../AuthWraprer";
 import { LoginSheme, TypeLoginScheme } from "@/feature/auth/schemes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoginMutation } from "../../hooks/useLoginMutation";
-import {Input} from "@/shared/ui/Input";
+import { Input } from "@/shared/ui/Input";
 import Button from "@/shared/ui/Buton";
+import Link from "next/link";
 
 export const LoginForm = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<TypeLoginScheme>({
@@ -50,6 +51,12 @@ export const LoginForm = () => {
           {...register("password")}
           error={errors.password?.message}
         />
+
+        <div className="text-right">
+          <Link href="/change-password" className="text-sm text-blue-500 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
 
         <Button
           disabled={isLoading}

@@ -70,62 +70,56 @@ let ProfileService = class ProfileService {
     }
     async findByEmail(email) {
         try {
-            return await this.prismaService.user.findUnique({
-                where: { email },
-            });
+            return await this.prismaService.user.findUnique({ where: { email } });
         }
         catch {
             throw new common_1.InternalServerErrorException('Error while finding user by email');
         }
     }
     async create(dto) {
-        try {
-            return await this.prismaService.user.create({
-                data: {
-                    ...dto,
-                    password: await bcrypt.hash(dto.password, 10)
-                },
-                select: profile_select_1.userSafeSelect,
-            });
-        }
-        catch (err) {
-            if (err.code === 'P2002' && err.meta?.target?.includes('email')) {
-                throw new common_1.ConflictException('User with wthis email already exists. Please, try to login or use another email.');
-            }
-            throw new common_1.InternalServerErrorException('Error while creating user');
-        }
+        return await this.prismaService.user.create({
+            data: {
+                ...dto,
+                password: await bcrypt.hash(dto.password, 10),
+            },
+            select: profile_select_1.userSafeSelect,
+        });
     }
-    async update(id, dto) {
+    async updateProfile(id, dto) {
         const user = await this.findById(id);
         if (dto.email && dto.email !== user.email) {
-            let existing;
-            try {
-                existing = await this.findByEmail(dto.email);
-            }
-            catch {
-                throw new common_1.InternalServerErrorException('Error while validating email');
-            }
+            const existing = await this.findByEmail(dto.email);
             if (existing)
                 throw new common_1.ConflictException('Email already in use');
         }
-        let dataToUpdate = { ...dto };
-        if (dto.password) {
-            const saltRounds = 10;
-            const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
-            dataToUpdate.password = hashedPassword;
-        }
-        let updatedUser;
-        try {
-            updatedUser = await this.prismaService.user.update({
-                where: { id },
-                data: dataToUpdate,
-                select: profile_select_1.userSafeSelect,
-            });
-        }
-        catch {
-            throw new common_1.InternalServerErrorException('Error while updating user');
-        }
+        const updatedUser = await this.prismaService.user.update({
+            where: { id },
+            data: dto,
+            select: profile_select_1.userSafeSelect,
+        });
         return updatedUser;
+    }
+    async resetPassword(user, oldPassword, newPassword) {
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            throw new common_1.BadRequestException('Old password is incorrect');
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const updatedUser = await this.prismaService.user.update({
+            where: { id: user.id },
+            data: { password: hashedPassword },
+            select: profile_select_1.userSafeSelect,
+        });
+        return updatedUser;
+    }
+    async resetPasswordByUserId(id, oldPassword, newPassword) {
+        const user = await this.prismaService.user.findUnique({
+            where: { id }
+        });
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        return this.resetPassword(user, oldPassword, newPassword);
     }
 };
 exports.ProfileService = ProfileService;

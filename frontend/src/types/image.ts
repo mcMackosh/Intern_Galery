@@ -21,10 +21,6 @@ export interface DeleteImagesResponse {
   deleted: string[];
 }
 
-export interface DeleteImagesDto {
-  ids: string[];
-}
-
-export interface MoveImagesDto {
+export interface SelectedImagesDto {
   ids: string[];
 }

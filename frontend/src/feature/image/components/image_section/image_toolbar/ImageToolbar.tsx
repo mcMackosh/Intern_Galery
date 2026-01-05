@@ -7,9 +7,10 @@ import Button from "@/shared/ui/Buton";
 import { useState } from "react";
 import { GallerySelectModal } from "../image_modal/GallerySelectModal";
 import { BaseModal } from "@/shared/ui/Modal/BaseModal";
+import { SelectedImagesDto } from "@/types/image";
 
 interface Props {
-    selectedIds: string[];
+    selectedIds: SelectedImagesDto;
     reset: () => void;
 }
 
@@ -22,7 +23,7 @@ export const ImageToolbar: React.FC<Props> = ({ selectedIds, reset }) => {
     const [showGalleryModal, setShowGalleryModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-    if (selectedIds.length === 0) return null;
+    if (selectedIds.ids.length === 0) return null;
 
     const handleGallerySelect = async (galleryId: string) => {
         if (actionType === 'copy') {
@@ -59,7 +60,7 @@ export const ImageToolbar: React.FC<Props> = ({ selectedIds, reset }) => {
                     <div className="flex items-center gap-2 text-sm">
                         <span className="text-gray-600">Selected</span>
                         <span className="inline-flex items-center justify-center min-w-[26px] h-6 px-2 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
-                            {selectedIds.length}
+                            {selectedIds.ids.length}
                         </span>
                     </div>
 
@@ -97,7 +98,7 @@ export const ImageToolbar: React.FC<Props> = ({ selectedIds, reset }) => {
                     className="max-w-md"
                 >
                     <h3 className="text-lg font-semibold mb-4">Confirm Deletion</h3>
-                    <p>Are you sure you want to delete {selectedIds.length} image(s)? This action cannot be undone.</p>
+                    <p>Are you sure you want to delete {selectedIds.ids.length} image(s)? This action cannot be undone.</p>
                     <div className="mt-4 flex justify-end gap-2">
                         <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>Cancel</Button>
                         <Button variant="danger" onClick={confirmDelete} disabled={isDeleting}>

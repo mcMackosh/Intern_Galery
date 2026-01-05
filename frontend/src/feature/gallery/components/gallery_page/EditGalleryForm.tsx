@@ -13,6 +13,7 @@ import { useUpdateGallery } from "../../hooks/useUpdateGallery";
 import { useOneGallery } from "../../hooks/useOneGallery";
 import Button from "@/shared/ui/Buton";
 import { Input } from "@/shared/ui/Input";
+import { Loader } from "@/shared/ui/Loader";
 
 interface UpdateGalleryFormProps {
   galleryId?: string;
@@ -51,11 +52,11 @@ export const UpdateGalleryForm = ({
   };
 
   if (galleryLoading) {
-    return <p className="text-center py-4">Loading...</p>;
+    return<Loader/>;
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form data-testid="edit-gallery-modal" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" >
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-gray-700">Gallery name</label>
         <Input

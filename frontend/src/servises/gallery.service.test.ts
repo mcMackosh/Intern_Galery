@@ -13,7 +13,7 @@ describe('GalleryService', () => {
 
   it('should fetch all galleries with default page', async () => {
     const mockData: IGalleryListResponse = {
-      data: [{ id: '1', title: 'Gallery1', description: 'Desc', role: UserRole.REGULAR }],
+      data: [{ id: '1', title: 'Gallery1', description: 'Desc', role: UserRole.REGULAR, images: [] }],
       meta: { total: 1, page: 1, limit: 6, totalPages: 1 },
     };
     (api.get as jest.Mock).mockResolvedValue({ data: mockData });
@@ -26,7 +26,7 @@ describe('GalleryService', () => {
 
   it('should fetch all galleries with query string', async () => {
     const mockData: IGalleryListResponse = {
-      data: [{ id: '1', title: 'Gallery1', description: 'Desc', role: UserRole.REGULAR }],
+      data: [{ id: '1', title: 'Gallery1', description: 'Desc', role: UserRole.REGULAR, images: [] }],
       meta: { total: 1, page: 2, limit: 6, totalPages: 1 },
     };
     (api.get as jest.Mock).mockResolvedValue({ data: mockData });
@@ -79,7 +79,7 @@ describe('GalleryService', () => {
   });
 
   it('should fetch a gallery by id', async () => {
-    const gallery: IGallery = { id: '1', title: 'Gallery1', description: 'Desc', role: UserRole.REGULAR };
+    const gallery: IGallery = { id: '1', title: 'Gallery1', description: 'Desc', role: UserRole.REGULAR, images: [] };
     (api.get as jest.Mock).mockResolvedValue({ data: gallery });
 
     const result = await galleryService.getGallery('1');

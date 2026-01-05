@@ -6,12 +6,12 @@ import { ImageList } from './image_list/ImageList';
 import { ImageToolbar } from './image_toolbar/ImageToolbar';
 import { ImageViewerModal } from './image_modal/ImageViewerModal';
 import { useGetImagesInfinite } from '../../hooks/useGetImages';
-import { Image } from '@/types/image';
-import { ImageSortSelect } from './ImageSortSelect';
+import { Image, SelectedImagesDto } from '@/types/image';
+import { ImageSortSelect } from '../image_sort/ImageSortSelect';
 
 export const ImageGallerySection = () => {
     const searchParams = useSearchParams();
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [selectedIds, setSelectedIds] = useState<SelectedImagesDto>({ ids: [] });
     const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
     const sortOrder = searchParams.get('sort') as 'dateAsc' | 'dateDesc' || 'dateDesc';
@@ -43,12 +43,14 @@ export const ImageGallerySection = () => {
     }, [data]);
 
     const toggleSelect = useCallback((id: string) => {
-        setSelectedIds(prev =>
-            prev.includes(id)
-                ? prev.filter(x => x !== id)
-                : [...prev, id]
-        );
-    }, []);
+    setSelectedIds(prev => {
+        const ids = prev.ids;
+        const newIds = ids.includes(id)
+            ? ids.filter(x => x !== id)
+            : [...ids, id];
+        return { ids: newIds };
+    });
+}, []);
 
     return (
         <div className="space-y-4">
@@ -56,12 +58,12 @@ export const ImageGallerySection = () => {
                 <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">
                     Images
                 </h2>
-                <ImageSortSelect value={sortOrder} onChange={() => setSelectedIds([])} />
+                <ImageSortSelect value={sortOrder} onChange={() => setSelectedIds({ ids: [] })} />
             </div>
 
             <ImageToolbar
                 selectedIds={selectedIds}
-                reset={() => setSelectedIds([])}
+                reset={() => setSelectedIds({ ids: [] })}
             />
 
             <ImageList

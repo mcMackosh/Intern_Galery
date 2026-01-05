@@ -34,12 +34,20 @@ jest.mock('@/shared/ui/Buton', () => ({
   ),
 }));
 
+jest.mock('../../hooks/useOneGallery', () => ({
+  useOneGallery: jest.fn(() => ({
+    gallery: { id: '1', title: 'My Gallery', description: '', images: [] },
+    isLoading: false,
+  })),
+}));
+
 describe('GalleryCard', () => {
   const baseGallery: IGallery = {
     id: '1',
     title: 'Test Gallery',
     description: 'Test description',
     role: UserRole.REGULAR,
+    images: [],
   };
 
   beforeEach(() => {
@@ -93,16 +101,12 @@ describe('GalleryCard', () => {
     expect(screen.getByTestId('delete-gallery')).toBeInTheDocument();
   });
 
-  it('opens edit modal', () => {
-    render(
-      <GalleryCard gallery={{ ...baseGallery, role: UserRole.ADMIN }} />
-    );
+  it('opens edit modal', async () => {
+    render(<GalleryCard gallery={{ ...baseGallery, role: UserRole.ADMIN }} />);
 
     fireEvent.click(screen.getByTestId('edit-gallery'));
 
-    expect(
-      screen.getByTestId('edit-gallery-modal')
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId('edit-gallery-modal')).toBeInTheDocument();
   });
 
   it('opens delete modal and confirms deletion', () => {

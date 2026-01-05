@@ -67,7 +67,7 @@ describe("useRegisterMutation", () => {
 
         await waitFor(() => {
             expect(toast.success).toHaveBeenCalledWith("Registrer is successful");
-            expect(mockPush).toHaveBeenCalledWith("/");
+            expect(mockPush).toHaveBeenCalledWith("/gallery");
         });
     });
 

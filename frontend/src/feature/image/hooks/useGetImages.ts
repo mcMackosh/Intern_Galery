@@ -16,15 +16,7 @@ export const useGetImagesInfinite = (limit = 20, sort: 'dateAsc' | 'dateDesc' = 
 
       const data = await imageService.getImagesByGallery(galleryId, pageParam as number, limit, order);
 
-      const groupedWithFullPath: Record<string, Image[]> = {};
-      Object.entries(data.items).forEach(([date, images]) => {
-        groupedWithFullPath[date] = images.map(img => ({
-          ...img,
-          path: `${SERVER_URL}/uploads/${img.path}`,
-        }));
-      });
-
-      return { ...data, items: groupedWithFullPath };
+      return { ...data};
     },
     getNextPageParam: (lastPage) => {
       if (lastPage.page >= lastPage.totalPages) return undefined;

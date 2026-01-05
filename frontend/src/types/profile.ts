@@ -7,4 +7,9 @@ export interface IProfile {
     createdAt: Date;
 }
 
-export type UpdateProfile = Partial<Omit<IProfile, "id" | "createdAt" | "updatedAt"> & {password: string}>;
+export type UpdateProfile = Partial<Omit<IProfile, "id" | "createdAt" | "updatedAt">>;
+
+export interface ResetPasswordDtoByToken {
+  oldPassword: string;
+  newPassword: string;
+}

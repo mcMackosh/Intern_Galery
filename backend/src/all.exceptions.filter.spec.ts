@@ -1,7 +1,7 @@
 
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Prisma } from 'prisma/__generated__';
-import { GlobalExceptionFilter } from './AllExceptionsFilter';
+import { GlobalExceptionFilter } from './all.exceptions.filter';
 
 describe('GlobalExceptionFilter', () => {
   let filter: GlobalExceptionFilter;

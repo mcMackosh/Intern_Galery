@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { Image as ImageType } from '@/types/image';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { SERVER_URL } from '@/env';
 
 interface Props {
     images: ImageType[];
@@ -44,7 +45,7 @@ export const ImageViewerModal: React.FC<Props> = ({
 
                 <div className="relative flex w-[1000px] h-[700px] items-center justify-center overflow-hidden rounded-xl bg-black/30">
                     <Image
-                        src={image.path}
+                        src={SERVER_URL + '/uploads/' + image.path}
                         alt={image.originalFilename}
                         width={1000}
                         height={700}

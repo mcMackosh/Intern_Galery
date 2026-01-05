@@ -4,7 +4,6 @@ import { IProfile, UpdateProfile } from '@/types/profile';
 import { toast } from 'sonner';
 import { toastMessage } from '@/shared/utils/tost';
 
-
 interface Context {
   prevProfile?: IProfile;
 }
@@ -28,14 +27,12 @@ export function useUpdateProfile() {
 
       return { prevProfile };
     },
-
     onError: (_err, _newData, context: Context | undefined) => {
       if (context?.prevProfile) {
         queryClient.setQueryData(['myProfile'], context.prevProfile);
       }
       toastMessage(_err);
     },
-
     onSuccess: () => {
       toast.success('Profile updated successfully!');
     },

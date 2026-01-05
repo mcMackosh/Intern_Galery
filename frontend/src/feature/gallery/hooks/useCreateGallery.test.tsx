@@ -49,7 +49,7 @@ describe('useCreateGallery', () => {
 
   it('rolls back data on error and calls toastMessage', async () => {
     const previousData: IGallery[] = [
-      { id: '1', title: 'Old', description: 'Old Desc', role: UserRole.ADMIN },
+      { id: '1', title: 'Old', description: 'Old Desc', role: UserRole.ADMIN, images: [] },
     ];
     queryClient.setQueryData(['galleries'], previousData);
 

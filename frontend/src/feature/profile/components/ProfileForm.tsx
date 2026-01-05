@@ -7,11 +7,11 @@ import { useMyProfile } from "../hooks/useMyProfile";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 import { ProfileFormData, profileSchema } from "../schemas/profileSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {Input} from "@/shared/ui/Input";
+import { Input } from "@/shared/ui/Input";
 import Button from "@/shared/ui/Buton";
 import UserIdCopy from "./UserId";
 
-const ProfileForm = () => {
+export const ProfileForm = () => {
   const { data: profile, isLoading } = useMyProfile();
   const updateMutation = useUpdateProfile();
 
@@ -22,25 +22,19 @@ const ProfileForm = () => {
         firstName: "",
         lastName: "",
         email: "",
-        password: "",
-        confirmPassword: ""
       }
     });
 
   useEffect(() => {
-    if (profile) {
-      reset(profile);
-    }
+    if (profile) reset(profile);
   }, [profile, reset]);
 
   const createPartialUpdate = (
     profile: ProfileFormData,
     dirtyFields: Record<string, boolean>
   ) => {
-
-    const { confirmPassword, ...data } = profile;
     return Object.fromEntries(
-      Object.entries(data).map(([key, value]) => {
+      Object.entries(profile).map(([key, value]) => {
         if (!dirtyFields[key]) return [key, undefined];
         return [key, value === "" ? undefined : value];
       })
@@ -49,69 +43,21 @@ const ProfileForm = () => {
 
   const onSubmit: SubmitHandler<ProfileFormData> = (data) => {
     if (!profile) return;
-
     const partial = createPartialUpdate(data, dirtyFields);
     updateMutation.mutate(partial);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-10">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  if (isLoading) return <Loader2 className="h-8 w-8 animate-spin text-primary" />;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <UserIdCopy userId={profile?.id}/>
-      <Input
-        id={'firstName'}
-        label="First Name"
-        disabled={updateMutation.isPending}
-        {...register("firstName")}
-        error={errors.firstName?.message}
-      />
+      <UserIdCopy userId={profile?.id} />
 
-      <Input
-        id={'lastName'}
-        label="Last Name"
-        disabled={updateMutation.isPending}
-        {...register("lastName")}
-        error={errors.lastName?.message}
-      />
+      <Input id="firstName" label="First Name" {...register("firstName")} error={errors.firstName?.message} />
+      <Input id="lastName" label="Last Name" {...register("lastName")} error={errors.lastName?.message} />
+      <Input id="email" label="Email" type="email" {...register("email")} error={errors.email?.message} />
 
-      <Input
-        id={'email'}
-        label="Email"
-        type="email"
-        disabled={updateMutation.isPending}
-        {...register("email")}
-        error={errors.email?.message}
-      />
-
-      <Input
-        id={'password'}
-        label="Password"
-        type="password"
-        disabled={updateMutation.isPending}
-        {...register("password")}
-        error={errors.password?.message}
-      />
-
-      <Input
-        id={'passwordc'}
-        label="Confirm Password"
-        type="password"
-        disabled={updateMutation.isPending}
-        {...register("confirmPassword")}
-        error={errors.confirmPassword?.message}
-      />
-
-      <Button className="w-full px-5 py-3 flex justify-center items-center gap-2 transition-transform duration-200 hover:scale-105 active:scale-95"
-        variant="default"
-        type="submit"
-        disabled={updateMutation.isPending}>
+      <Button type="submit" disabled={updateMutation.isPending}>
         {updateMutation.isPending ? "Updating..." : "Update Profile"}
       </Button>
 
@@ -121,5 +67,3 @@ const ProfileForm = () => {
     </form>
   );
 };
-
-export default ProfileForm;

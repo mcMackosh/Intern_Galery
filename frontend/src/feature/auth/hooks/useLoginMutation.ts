@@ -12,7 +12,7 @@ export function useLoginMutation() {
         mutationFn: async (values: TypeLoginScheme) => authService.login(values),
         onSuccess: () => {
             toast.success('Login is successful');
-            router.push('/')
+            router.push('/gallery')
         },
         onError: (error: Error) => {
             toastMessage(error);

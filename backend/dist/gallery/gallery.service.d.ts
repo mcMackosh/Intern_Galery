@@ -19,6 +19,7 @@ export declare class GalleryService {
             createdAt: Date;
             role: import("prisma/__generated__").$Enums.UserRole;
             imagesCount: number;
+            images: string[];
         }[];
         meta: {
             total: number;

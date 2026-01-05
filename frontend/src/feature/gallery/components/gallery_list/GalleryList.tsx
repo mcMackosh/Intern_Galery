@@ -6,6 +6,7 @@ import GalleryCard from './GalleryCard';
 import { PaginationComponent } from './Pagination';
 import GalleryFilters from './GalleryFilters';
 import Button from '@/shared/ui/Buton';
+import { Loader } from '@/shared/ui/Loader';
 
 export default function GalleryList() {
     const page = useSelector((state: any) => state.pagination.page);
@@ -14,11 +15,7 @@ export default function GalleryList() {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[60vh]">
-                <div className="animate-spin rounded-full h-12 w-12 border-4
-                                border-gray-300 border-t-blue-500"  role="status"/>
-                    
-            </div>
+            <Loader/>
         );
     }
 

@@ -48,6 +48,7 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const __generated__1 = require("../../prisma/__generated__/index.js");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const validate_date_1 = require("../libs/common/validate.date");
 let GalleryService = class GalleryService {
     prisma;
     constructor(prisma) {
@@ -67,19 +68,14 @@ let GalleryService = class GalleryService {
         });
     }
     async getAllGalleries(userId, page, limit, query) {
-        const { search, sortBy, orderBy, startDate, endDate, minImages, maxImages, } = query;
+        const { search, sortBy, orderBy, startDate, endDate, minImages, maxImages } = query;
+        (0, validate_date_1.validateDateRange)(startDate, endDate);
         const skip = (page - 1) * limit;
         const where = {
             memberships: {
-                some: { userId },
-            },
+                some: { userId: userId }
+            }
         };
-        if (search) {
-            where.title = {
-                contains: search,
-                mode: 'insensitive',
-            };
-        }
         if (startDate || endDate) {
             where.createdAt = {};
             if (startDate)
@@ -87,44 +83,73 @@ let GalleryService = class GalleryService {
             if (endDate)
                 where.createdAt.lte = new Date(endDate);
         }
-        const galleries = await this.prisma.gallery.findMany({
-            where,
-            orderBy: {
-                [sortBy]: orderBy,
-            },
-            include: {
-                memberships: {
-                    where: { userId },
-                    select: { role: true },
+        if (search) {
+            where.title = {
+                contains: search,
+                mode: 'insensitive'
+            };
+        }
+        const sortFieldMap = {
+            createdAt: 'createdAt',
+            title: 'title'
+        };
+        const orderByField = sortFieldMap[sortBy || 'createdAt'] || 'createdAt';
+        const orderDirection = orderBy || 'desc';
+        const [total, galleries] = await Promise.all([
+            this.prisma.gallery.count({ where }),
+            this.prisma.gallery.findMany({
+                where,
+                include: {
+                    memberships: {
+                        where: { userId: userId },
+                        select: { role: true }
+                    },
+                    images: {
+                        take: 4,
+                        orderBy: { createdAt: 'asc' },
+                        select: { path: true }
+                    },
+                    _count: {
+                        select: { images: true }
+                    }
                 },
-                _count: {
-                    select: { images: true },
+                orderBy: {
+                    [orderByField]: orderDirection
                 },
-            },
-        });
-        const filtered = galleries.filter(g => {
-            const count = g._count.images;
-            if (minImages !== undefined && count < minImages)
-                return false;
-            if (maxImages !== undefined && count > maxImages)
-                return false;
-            return true;
-        });
-        const paginated = filtered.slice(skip, skip + limit);
+                skip,
+                take: limit
+            })
+        ]);
+        let filteredGalleries = galleries;
+        if (minImages !== undefined || maxImages !== undefined) {
+            filteredGalleries = galleries.filter(gallery => {
+                const count = gallery._count.images;
+                if (minImages !== undefined && count < minImages)
+                    return false;
+                if (maxImages !== undefined && count > maxImages)
+                    return false;
+                return true;
+            });
+        }
+        const finalTotal = minImages !== undefined || maxImages !== undefined
+            ? filteredGalleries.length
+            : total;
+        const data = filteredGalleries.map(gallery => ({
+            id: gallery.id,
+            title: gallery.title,
+            createdAt: gallery.createdAt,
+            role: gallery.memberships[0]?.role || null,
+            imagesCount: gallery._count.images,
+            images: gallery.images.map(img => img.path)
+        }));
         return {
-            data: paginated.map(g => ({
-                id: g.id,
-                title: g.title,
-                createdAt: g.createdAt,
-                role: g.memberships[0]?.role ?? null,
-                imagesCount: g._count.images,
-            })),
+            data,
             meta: {
-                total: filtered.length,
+                total: finalTotal,
                 page,
                 limit,
-                totalPages: Math.ceil(filtered.length / limit),
-            },
+                totalPages: Math.ceil(finalTotal / limit)
+            }
         };
     }
     async getGalleryInfoById(id, userId) {

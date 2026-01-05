@@ -1,6 +1,6 @@
 /* ---------- IMPORTS ---------- */
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import GalleryList from './GalleryList';
 import { useGalleries } from '../../hooks/useGallery';
 import { useSelector } from 'react-redux';
@@ -49,18 +49,21 @@ describe('GalleryList', () => {
     mockUseSelector.mockReturnValue(1);
   });
 
-  it('shows loader while loading', () => {
-    mockUseGalleries.mockReturnValue({
-      data: null,
-      meta: null,
-      isLoading: true,
-      isError: false,
-      refetch: jest.fn(),
+  describe('GalleryList', () => {
+    it('shows loader while loading', async () => {
+      mockUseGalleries.mockReturnValue({
+        data: null,
+        meta: null,
+        isLoading: true,
+        isError: false,
+        refetch: jest.fn(),
+      });
+
+      render(<GalleryList />);
+
+      const loader = await screen.findByTestId('loader');
+      expect(loader).toBeInTheDocument();
     });
-
-    render(<GalleryList />);
-
-    expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('shows error and retry button on error', () => {

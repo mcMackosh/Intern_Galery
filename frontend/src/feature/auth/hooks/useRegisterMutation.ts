@@ -12,7 +12,7 @@ export function useRegisterMutation() {
         mutationFn: async (values: TypeRegisterSchema) => authService.register(values),
         onSuccess: () => {
             toast.success('Registrer is successful');
-            router.push('/');
+            router.push('/gallery');
         },
         onError: (error: Error) => {
             toastMessage(error);

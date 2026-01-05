@@ -49,7 +49,7 @@ describe('useGetImagesInfinite', () => {
 
     await waitFor(() => {
       expect(result.current.data?.pages[0].items['2025-12-27'][0].path).toBe(
-        `${SERVER_URL}/uploads/img1.png`
+        `img1.png`
       );
     });
   });

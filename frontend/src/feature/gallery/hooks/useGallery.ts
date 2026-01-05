@@ -1,6 +1,6 @@
 import { useQuery, UseQueryOptions, keepPreviousData } from '@tanstack/react-query';
 import { galleryService } from '../../../servises/gallery.service';
-import { GalleryFilters, IGalleryListResponse } from '@/types/gallery';
+import { IGalleryListResponse } from '@/types/gallery';
 import { useSearchParams } from 'next/navigation';
 
 
@@ -14,7 +14,7 @@ export const useGalleries = (page: number) => {
     queryKey,
     queryFn: ({ signal }) =>
       galleryService.getAllGalleries(page, signal, queryString),
-    placeholderData: keepPreviousData,
+      placeholderData: keepPreviousData,
     staleTime: 5000,
   });
 

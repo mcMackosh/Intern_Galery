@@ -1,17 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Pencil, Delete } from 'lucide-react'
+import { Pencil, Delete, User } from 'lucide-react'
 import { useOneGallery } from '../../hooks/useOneGallery'
 import { BaseModal } from '@/shared/ui/Modal/BaseModal'
-import { UpdateGalleryForm } from './EditGalleryForm'
 import { useDeleteGallery } from '../../hooks/useDeleteGallery'
 import MembershipForm from '@/feature/membership/components/MembershipForm'
 import { UserRole } from '@/types/membership'
 import Button from '@/shared/ui/Buton'
 import Link from 'next/link'
+import { UpdateGalleryForm } from './EditGalleryForm'
 
-export function GalleryInfo() {
+export function GallerySection() {
   const { gallery, isLoading: galleryLoading } = useOneGallery()
   const { deleteGallery } = useDeleteGallery()
 
@@ -39,7 +39,7 @@ export function GalleryInfo() {
           {gallery?.title || 'Untitled Gallery'}
         </h1>
         <span className="inline-block px-4 py-1 text-sm font-medium rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md">
-          {gallery?.role || 'USER'}
+          {gallery?.role || UserRole.REGULAR}
         </span>
       </div>
 

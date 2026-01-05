@@ -3,10 +3,11 @@ import { imageService } from '@/servises/image.service';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { toastMessage } from '@/shared/utils/tost';
+import { SelectedImagesDto } from '@/types/image';
 
 type MoveImagesPayload = {
   targetGalleryId: string;
-  ids: string[];
+  ids: SelectedImagesDto;
 };
 
 export const useMoveImages = () => {

@@ -6,7 +6,6 @@ import { UploadPreviewGrid } from './UploadPreviewGrid';
 import { UploadActions } from './UploadActions';
 import { UploadDropzone } from './UploadDropzone';
 import { useUploadImages } from '../../hooks/useUploadImages';
-import { useMyProfile } from '@/feature/profile/hooks/useMyProfile';
 
 const UploadImagesSection: React.FC = () => {
     const router = useRouter();
@@ -14,7 +13,6 @@ const UploadImagesSection: React.FC = () => {
     const galleryId = params.galleryId as string;
 
     const [files, setFiles] = useState<File[]>([]);
-    const { data, isPending } = useMyProfile();
 
     const { mutate: uploadImages, isPending: isLoading } = useUploadImages();
 
@@ -37,7 +35,6 @@ const UploadImagesSection: React.FC = () => {
             </h1>
 
             <UploadDropzone
-                files={files}
                 setFiles={setFiles}
                 data-testid="upload-dropzone"
             />

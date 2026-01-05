@@ -4,6 +4,7 @@ import { ImageToolbar } from './ImageToolbar';
 import { useCopyImages } from '@/feature/image/hooks/useCopyImages';
 import { useMoveImages } from '@/feature/image/hooks/useMoveImages';
 import { useDeleteImages } from '@/feature/image/hooks/useDeleteImage';
+import { SelectedImagesDto } from '@/types/image';
 
 jest.mock('@/feature/image/hooks/useCopyImages');
 jest.mock('@/feature/image/hooks/useMoveImages');
@@ -26,7 +27,7 @@ const mockUseDeleteImages = useDeleteImages as jest.Mock;
 
 describe('ImageToolbar', () => {
   const reset = jest.fn();
-  const selectedIds = ['1', '2'];
+  const selectedIds = { ids: ['img1', 'img2'] } as SelectedImagesDto;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -46,7 +47,7 @@ describe('ImageToolbar', () => {
     expect(screen.getByText('Reset')).toBeInTheDocument();
   });
 
-  it('opens GallerySelectModal on Copy and Move click', async () => {
+  it('opens GallerySelectModal on Copy and Move click', () => {
     render(<ImageToolbar selectedIds={selectedIds} reset={reset} />);
 
     fireEvent.click(screen.getByText('Copy'));
@@ -67,7 +68,11 @@ describe('ImageToolbar', () => {
     fireEvent.click(screen.getByText('Select Gallery'));
 
     await waitFor(() => {
-      expect(copyImages).toHaveBeenCalledWith({ targetGalleryId: 'gallery-1', ids: selectedIds });
+      const payload = {
+        targetGalleryId: 'gallery-1',
+        ids: selectedIds,
+      };
+      expect(copyImages).toHaveBeenCalledWith(payload);
       expect(reset).toHaveBeenCalled();
     });
   });
@@ -82,7 +87,11 @@ describe('ImageToolbar', () => {
     fireEvent.click(screen.getByText('Select Gallery'));
 
     await waitFor(() => {
-      expect(moveImages).toHaveBeenCalledWith({ targetGalleryId: 'gallery-1', ids: selectedIds });
+      const payload = {
+        targetGalleryId: 'gallery-1',
+        ids: selectedIds,
+      };
+      expect(moveImages).toHaveBeenCalledWith(payload);
       expect(reset).toHaveBeenCalled();
     });
   });
@@ -114,7 +123,7 @@ describe('ImageToolbar', () => {
   });
 
   it('renders nothing if no selectedIds', () => {
-    const { container } = render(<ImageToolbar selectedIds={[]} reset={reset} />);
+    const { container } = render(<ImageToolbar selectedIds={{ ids: [] }} reset={reset} />);
     expect(container.firstChild).toBeNull();
   });
 });

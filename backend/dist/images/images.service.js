@@ -45,7 +45,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImagesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
-const fs = __importStar(require("fs"));
+const fs = __importStar(require("fs/promises"));
 const path = __importStar(require("path"));
 const crypto_1 = require("crypto");
 const fs_extra_1 = require("fs-extra");
@@ -57,7 +57,7 @@ let ImagesService = class ImagesService {
     }
     async ensureGalleryFolder(galleryId) {
         const folder = path.join(this.UPLOAD_ROOT, galleryId);
-        await fs.promises.mkdir(folder, { recursive: true });
+        await fs.mkdir(folder, { recursive: true });
         return folder;
     }
     toImageUrl(filePath) {
@@ -79,7 +79,7 @@ let ImagesService = class ImagesService {
                         galleryId,
                     },
                 });
-                await fs.promises.writeFile(fullPath, file.buffer);
+                await fs.writeFile(fullPath, file.buffer);
                 createdImages.push(image);
             }
             return createdImages.map(img => ({
@@ -104,7 +104,7 @@ let ImagesService = class ImagesService {
             });
             for (const img of images) {
                 const fullPath = path.join(this.UPLOAD_ROOT, img.path);
-                await fs.promises.unlink(fullPath);
+                await fs.unlink(fullPath);
             }
             return { deleted: ids };
         });
@@ -185,7 +185,7 @@ let ImagesService = class ImagesService {
                 const src = path.join(this.UPLOAD_ROOT, img.path);
                 const destRel = path.join(targetGalleryId, filename);
                 const dest = path.join(this.UPLOAD_ROOT, destRel);
-                await fs.promises.copyFile(src, dest);
+                await fs.copyFile(src, dest);
                 const newImage = await tx.image.create({
                     data: {
                         path: destRel,

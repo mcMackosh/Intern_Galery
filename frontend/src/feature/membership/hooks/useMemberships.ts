@@ -2,7 +2,6 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { membershipService } from '../../../servises/membership.service'
-import { IUserMembership } from '@/types/membership'
 import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { toastMessage } from '@/shared/utils/tost'

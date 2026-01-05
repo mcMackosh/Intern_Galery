@@ -1,7 +1,8 @@
 import { FunctionComponent } from "react";
 import ProfileAvatar from "./ProfileAvatar";
-import ProfileForm from "./ProfileForm";
+import {ProfileForm} from "./ProfileForm";
 import ProfileActions from "./ProfileActions";
+import { ResetPasswordForm } from "./ResetPasswordForm";
 
 const ProfileMenu: FunctionComponent = () => {
   return (
@@ -12,6 +13,7 @@ const ProfileMenu: FunctionComponent = () => {
       </div>
 
       <ProfileForm />
+      <ResetPasswordForm/>
       <ProfileActions />
     </div>
   );

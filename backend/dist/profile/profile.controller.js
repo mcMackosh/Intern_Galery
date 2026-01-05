@@ -16,9 +16,9 @@ exports.ProfileController = void 0;
 const common_1 = require("@nestjs/common");
 const profile_service_1 = require("./profile.service");
 const authorized_decorator_1 = require("../auth/decorators/authorized.decorator");
-const auth_guard_1 = require("../auth/guard/auth.guard");
 const profile_dto_1 = require("./dto/profile.dto");
 const swagger_1 = require("@nestjs/swagger");
+const auth_decorator_1 = require("../auth/decorators/auth.decorator");
 let ProfileController = class ProfileController {
     userService;
     constructor(userService) {
@@ -28,13 +28,17 @@ let ProfileController = class ProfileController {
         return this.userService.findById(userId);
     }
     async updateProfile(userId, dto) {
-        return this.userService.update(userId, dto);
+        return this.userService.updateProfile(userId, dto);
+    }
+    async resetPasswordByToken(userId, dto) {
+        const { oldPassword, newPassword } = dto;
+        return this.userService.resetPasswordByUserId(userId, oldPassword, newPassword);
     }
 };
 exports.ProfileController = ProfileController;
 __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, auth_decorator_1.Authorization)(),
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get current user profile' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Profile retrieved successfully', type: Object }),
@@ -47,8 +51,8 @@ __decorate([
 ], ProfileController.prototype, "findProfile", null);
 __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, common_1.Put)(),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.Patch)(),
+    (0, auth_decorator_1.Authorization)(),
     (0, swagger_1.ApiOperation)({ summary: 'Update current user profile' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Profile updated successfully', type: Object }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad Request' }),
@@ -60,6 +64,21 @@ __decorate([
     __metadata("design:paramtypes", [String, profile_dto_1.ProfileDto]),
     __metadata("design:returntype", Promise)
 ], ProfileController.prototype, "updateProfile", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Patch)('change-password-by_token'),
+    (0, auth_decorator_1.Authorization)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Change current user password' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Password updated successfully', type: Object }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad Request' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    __param(0, (0, authorized_decorator_1.Authorized)('userId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, profile_dto_1.ResetPasswordDto]),
+    __metadata("design:returntype", Promise)
+], ProfileController.prototype, "resetPasswordByToken", null);
 exports.ProfileController = ProfileController = __decorate([
     (0, common_1.Controller)('profile'),
     (0, swagger_1.ApiTags)('profile'),

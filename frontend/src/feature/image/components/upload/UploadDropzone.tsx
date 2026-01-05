@@ -1,10 +1,9 @@
 import React from 'react';
 
 export const UploadDropzone: React.FC<{
-    files: File[];
     setFiles: React.Dispatch<React.SetStateAction<File[]>>;
     'data-testid'?: string;
-}> = ({ files, setFiles, 'data-testid': dataTestId = 'upload-dropzone' }) => {
+}> = ({setFiles, 'data-testid': dataTestId = 'upload-dropzone' }) => {
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();

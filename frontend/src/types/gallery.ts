@@ -5,6 +5,7 @@ export interface IGallery {
   title: string;
   description: string;
   role: UserRole;
+  images: string[];
 }
 
 export interface IGalleryListResponse {
@@ -17,11 +18,5 @@ export interface IGalleryListResponse {
   };
 }
 
-export interface GalleryFilters {
-  search?: string;
-  sortBy?: 'title' | 'createdAt';
-  startDate?: Date | null;
-  endDate?: Date | null;
-  minImages?: number;
-  maxImages?: number;
-}
+export type GallerySortBy = 'title' | 'createdAt' | '';
+export type GalleryOrderBy = 'asc' | 'desc' | '';

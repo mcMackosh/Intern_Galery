@@ -44,14 +44,14 @@ let ImagesController = class ImagesController {
         return this.imagesService.deleteImages(body.ids, galleryId);
     }
     async moveImages(body, targetGalleryId, galleryId) {
-        if (!body?.ids || !Array.isArray(body.ids) || !targetGalleryId) {
-            throw new common_1.BadRequestException('ids array and targetGalleryId are required');
+        if (!body.ids?.length || !targetGalleryId) {
+            throw new common_1.BadRequestException('ids and targetGalleryId are required');
         }
         return this.imagesService.moveImages(body.ids, targetGalleryId, galleryId);
     }
     async copyImages(body, targetGalleryId, galleryId) {
-        if (!body?.ids || !Array.isArray(body.ids) || !targetGalleryId) {
-            throw new common_1.BadRequestException('ids array and targetGalleryId are required');
+        if (!body.ids?.length || !targetGalleryId) {
+            throw new common_1.BadRequestException('ids and targetGalleryId are required');
         }
         return this.imagesService.copyImages(body.ids, targetGalleryId, galleryId);
     }

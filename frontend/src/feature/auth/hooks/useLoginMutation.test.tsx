@@ -36,7 +36,7 @@ describe("useLoginMutation", () => {
       result.current.login(loginData);
     });
 
-    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/"));
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/gallery"));
     expect(authService.login).toHaveBeenCalledWith(loginData);
     expect(toast.success).toHaveBeenCalledWith("Login is successful");
   });

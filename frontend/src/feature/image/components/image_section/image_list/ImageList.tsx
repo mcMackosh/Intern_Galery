@@ -2,12 +2,13 @@
 
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { Image } from '@/types/image';
+import { Image, SelectedImagesDto } from '@/types/image';
 import { ImageCard } from './ImageCard';
+import { Loader } from '@/shared/ui/Loader';
 
 interface Props {
   imagesByDate: Record<string, Image[]>;
-  selectedIds: string[];
+  selectedIds: SelectedImagesDto;
   onSelect: (id: string) => void;
   onOpen: (index: number) => void;
   hasMore: boolean;
@@ -32,14 +33,7 @@ export const ImageList: React.FC<Props> = ({
       hasMore={hasMore}
       scrollThreshold={0.9}
       loader={
-        <div className="py-6 text-center text-sm text-muted-foreground">
-          Loading...
-        </div>
-      }
-      endMessage={
-        <div className="py-6 text-center text-sm text-muted-foreground">
-          Its all images
-        </div>
+        <Loader/>
       }
     >
       <div className="flex flex-col gap-6">
@@ -56,7 +50,7 @@ export const ImageList: React.FC<Props> = ({
                 <ImageCard
                   key={img.id}
                   image={img}
-                  selected={selectedIds.includes(img.id)}
+                  selected={selectedIds.ids.includes(img.id)}
                   onSelect={() => onSelect(img.id)}
                   onOpen={() => onOpen(index)}
                 />
